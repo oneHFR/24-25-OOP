@@ -60,7 +60,7 @@ void fail(int (*score)[SCORE_NUM])
     for (p = score; p < STUDENT_NUM + score; p++) {
         for (p1 = *p; p1 < *p + SCORE_NUM; p1++) {
             average += *p1;
-            if (*p1 <= 60)
+            if (*p1 < 60)
                 helper++;
         }
 

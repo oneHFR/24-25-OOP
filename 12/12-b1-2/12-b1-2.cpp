@@ -29,8 +29,11 @@ void average(int (*score)[STUDENT_NUM])
              允许  ：int a[10], p;
                      for(p=a; p<a+10; p++)
                          cout << *p;          */
-
-
+    float average = 0;
+    for (int* p = *score; p < *score + STUDENT_NUM; p++)
+        average += *p;
+    average = average / STUDENT_NUM;
+    cout << "第1门课平均分：" << average << endl << endl;
 
 }
 
@@ -46,8 +49,35 @@ void fail(int (*score)[STUDENT_NUM])
     /* 函数定义语句部分：
        1、本函数中仅允许定义 3个简单变量 + 1个行指针变量 + 1个简单指针变量 */
 
-       /* 函数执行语句部分（要求同average）*/
+       /* 函数执行语句部分（要求同average）
+       2门以上不及格的学生：
+        No：2 92 82 72 32 52 平均：66
+       */
+    float average = 0;
+    int helper = 0;
+    int(*p)[STUDENT_NUM];
+    int* p1;
+    /* 函数执行语句部分（要求同average）*/
+    cout << "2门以上不及格的学生：" << endl;
+    for (p1 = *score; p1 < STUDENT_NUM + *score; p1++) {
+        for (p = score; p < score + SCORE_NUM; p++) {
+            if (*(*p + (p1 - *score)) < 60)
+                helper++;
+        }
 
+        average = average / SCORE_NUM;
+        if (helper >= 2) {
+            cout << "No：" << (p1 - *score + 1) << " ";
+            for (p = score; p < score + SCORE_NUM; p++) {
+                cout << *(*p + (p1 - *score)) << " ";
+                average += *(*p + (p1 - *score));
+            }
+            cout << "平均：" << average / SCORE_NUM << endl;
+        }
+        helper = 0;
+        average = 0;
+    }
+    cout << endl;
 
 }
 
@@ -64,7 +94,29 @@ void good(int (*score)[STUDENT_NUM])
        1、本函数中仅允许定义 3个简单变量 + 1个行指针变量 + 1个简单指针变量 */
 
        /* 函数执行语句部分（要求同average）*/
+    float average = 0;
+    int helper = 0;
+    int(*p)[STUDENT_NUM];
+    int* p1;
+    /* 函数执行语句部分（要求同average）*/
+    cout << "平均90以上或全部85以上的学生：" << endl;
+    for (p1 = *score; p1 < STUDENT_NUM + *score; p1++) {
+        for (p = score; p < score + SCORE_NUM; p++) {
+            if (*(*p + (p1 - *score)) >= 85)
+                helper++;
+            average += *(*p + (p1 - *score));
+        }
 
+        average = average / SCORE_NUM;
+        if (average >= 90 || helper == SCORE_NUM) {
+            cout << "No：" << (p1 - *score + 1) << " ";
+            for (p = score; p < score + SCORE_NUM; p++) 
+                cout << *(*p + (p1 - *score)) << " ";
+            cout << "平均：" << average << endl;
+        }
+        helper = 0;
+        average = 0;
+    }
 }
 
 /***************************************************************************
@@ -83,9 +135,19 @@ int main()
         {61,32,80,91},  //第1-4个学生的第4门课成绩
         {51,52,95,88} };//第1-4个学生的第5门课成绩
     /* 除上面的预置数组外，本函数中仅允许定义 1个行指针变量 + 1个简单指针变量 */
-
+    cout << "初始信息：" << endl;
+    // No.1-4学生的第5门课的成绩：
+    for (int(*p)[STUDENT_NUM] = a; p < SCORE_NUM + a; p++) {
+        cout << "No.1-4学生的第" << (p - a + 1) << "门课的成绩：";
+        for (int* p1 = *p; p1 < *p + STUDENT_NUM; p1++)
+            cout << *p1 << " ";
+        cout << endl;
+    }
+    cout << endl;
     /* 函数执行语句部分（要求同average）*/
-
+    average(a);
+    fail(a);
+    good(a);
 
     return 0;
 }
