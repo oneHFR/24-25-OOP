@@ -159,27 +159,31 @@ void H6(int s[11][11], int r, int c)
 	cct_gotoxy(x0, y0);
 	location_2(s, r, c, 0, 2);
 
-
+	cct_setcolor(0);
 	cct_gotoxy(0, 3 * r + 4);
 
 }
 
 void H7(int s[11][11], int r, int c)
 {
-	int h[11][11] = { -12 };
-	int x0, y0;
+	int helper = 27;
+	while (helper == 27) {
+		int h[11][11] = { -12 };
+		int x0, y0;
 
-	initializa_input(s, r, c);
-	fill(s, r, c, 5);
+		initializa_input(s, r, c);
+		fill(s, r, c, 5);
 
-	set_cmd(r, c, 3);
-	print_canvas(s, r, c, 1, 0, 2);
-	print_star(s, r, c, 1);
-	cct_getxy(x0, y0);
-	cct_gotoxy(0, 4 * r + 3);
-	cout << "箭头键/鼠标移动，回车键/单击左键选择, Q/单击右键结束" << endl;
-	cct_gotoxy(x0, y0);
-	location_2(s, r, c, 1, 2);
+		set_cmd(r, c, 3);
+		print_canvas(s, r, c, 1, 0, 2);
+		print_star(s, r, c, 1);
+		cct_getxy(x0, y0);
+		cct_gotoxy(0, 4 * r + 3);
+		cout << "箭头键/鼠标移动，回车键/单击左键选择, Q/单击右键结束" << endl;
+		cct_gotoxy(x0, y0);
+		helper = location_2(s, r, c, 1, 2);
+	}
+
 	cct_gotoxy(0, 4 * r + 3);
 
 }

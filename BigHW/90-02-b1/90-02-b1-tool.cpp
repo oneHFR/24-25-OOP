@@ -22,7 +22,7 @@ void get_move(int (*s)[11], int r, int c, int* ir, int* ic)
 			|| input[0] >= 'A' && input[0] <= ('A' + r - 1))
 			&& (input[1] >= '0' && input[1] <= '0' + c - 1)) {
 			if (input[0] >= 'A' && input[0] <= ('A' + r - 1))
-				*ir = input[0] - 'A';
+				*ir = input[0] - 'A' + 1;
 			else
 				*ir = input[0] - 'a' + 1;
 			*ic = input[1] - '0' + 1;

@@ -80,9 +80,17 @@ void fill(int s[11][11], int r, int c, int option, int mode)
 			s[i][j] = rand() % option + 1;
 		}
 	}
-	//s[9][1] = 2;
-	//s[9][2] = 2;
-
+	//for (int i = 1; i <= r; i++) {
+	//	s[i][1] = 1;
+	//}
+	//for (int i = 1; i <= r; i++) {
+	//	s[i][4] = 1;
+	//}
+	//for (int i = 1; i <= r; i++) {
+	//	s[i][5] = 1;
+	//}
+	//s[5][2] = 1;
+	//s[5][3] = 1;
 }
 
 /*------------------------------ 移动区----------------------------------*/
@@ -573,6 +581,7 @@ int check_3(int (*s)[11], int r, int c, int (*h)[11])
 	for (int i = 1; i <= r; i++) {
 		for (int j = 1; j <= c; j++) {
 			if (s[i][j]) {
+				in_h(h);
 				check_keep = check_2(s, r, c, h, i, j);
 				if (check_keep)
 					return 1;
@@ -591,17 +600,17 @@ void set_cmd(int r, int c, int mode)
 	cct_cls();
 	int hang, lie;
 	if (mode == 3) {
-		cct_setfontsize("新宋体", 24);
+		cct_setfontsize("新宋体", 16);
 		hang = 7 + 4 * r;
 		lie = 5 + 8 * c;
 	}
 	else if (mode == 2) {
-		cct_setfontsize("新宋体", 24);
+		cct_setfontsize("新宋体", 16);
 		hang = 8 + 3 * r; // 3 * r + 4
 		lie = 7 + 6 * c;
 	}
 	else {
-		cct_setfontsize("新宋体", 32);
+		cct_setfontsize("新宋体", 36);
 		hang = 6 + r;
 		lie = 40;
 	}
@@ -620,12 +629,12 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 	if (speed) 
 		m = 0;
 	else
-		m = 0; // flag
+		m = 2; // flag
 	cct_gotoxy(0, 1);
 	if (mode == 2) {
 		cct_setcolor();
 		if(!grid)
-			cout << setw(2) << ' '; //
+			cout << setw(1) << ' '; //
 		for (int j = 0; j < c; j++) {
 			if(!j && grid)
 				cout << setw(6 + 1 * grid) << j;
@@ -638,29 +647,29 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 	cct_setcolor(15, 0);
 	if (mode == 2) {
 		cct_gotoxy(2, 2);
-		cout << "╔═";
+		cout << "╔ ═ ";
 	}
 	else
-		cout << "╔";
+		cout << "╔ ";
 	for (int i = 1; i < c; i++) {
 		Sleep(m);
 		if (grid) {
 			if (mode == 2)
-				cout << "══╦═";
+				cout << "═ ═ ╦ ═ ";
 			else
-				cout << "═╦"; // "═╩";
+				cout << "═ ╦ "; 
 		}
 		else {
 			if (mode == 2)
-				cout << "═══";
+				cout << "═ ═ ═ ";
 			else
-				cout << "═";
+				cout << "═ ";
 		}
 	}
 	if (mode == 2)
-		cout << "══╗" << endl;
+		cout << "═ ═ ╗ " << endl;
 	else
-		cout << "═╗" << endl;
+		cout << "═ ╗ " << endl;
 	cct_setcolor(0); 
 	/*---------------------------------------------------------------------------------------*/
 	if (mode == 1) {
@@ -668,10 +677,10 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 			for (int j = 0; j <= c + 1; j++) {
 				if (j == 0) {
 					cct_setcolor(15, 0);
-					cout << "║";
+					cout << "║ ";
 					if (grid) {
 						for (int w = 1; w < c; w++) {
-							cout << "  ║";
+							cout << "  ║ ";
 						}
 						cout << "  ";
 					}
@@ -680,7 +689,7 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 						cout << setfill(' ') << setw(2 * c) << ' ';
 					}
 					cct_setcolor(15, 0);
-					cout << "║";
+					cout << "║ ";
 					Sleep(m);
 				}
 			}
@@ -689,13 +698,13 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 			if (i != r && grid) {
 				for (int j = 0; j <= 2 * c; j++) {
 					if (j == 0) {
-						cout << "╠";
+						cout << "╠ ";
 					}
 					else if (j == 2 * c) {
-						cout << "╣";
+						cout << " ╣ ";
 					}
 					else if (j % 2 == 0) {
-						cout << "╬";
+						cout << " ╬ ";
 					}
 					else {
 						cout << "═";
@@ -712,9 +721,9 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 			for (int i = 0; i < r; i++) {
 				cout << "  ";
 				cct_setcolor(15, 0);
-				cout << "║";
+				cout << "║ ";
 				for (int j = 0; j < c; j++) {
-					cout << "      ║";
+					cout << "      ║ ";
 					Sleep(m);
 				}
 				cct_setcolor();
@@ -722,9 +731,9 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 
 				cout << (char)(i + 'A') << ' ';
 				cct_setcolor(15, 0);
-				cout << "║";
+				cout << "║ ";
 				for (int j = 0; j < c; j++) {
-					cout << "      ║";
+					cout << "      ║ ";
 					Sleep(m);
 				}
 				cct_setcolor();
@@ -732,9 +741,9 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 
 				cout << "  ";
 				cct_setcolor(15, 0);
-				cout << "║";
+				cout << "║ ";
 				for (int j = 0; j < c; j++) {
-					cout << "      ║";
+					cout << "      ║ ";
 					Sleep(m);
 				}
 				cct_setcolor();
@@ -743,12 +752,12 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 				if (i != r - 1) {
 					cout << "  ";
 					cct_setcolor(15, 0);
-					cout << "╠";
+					cout << "╠ ";
 					for (int j = 0; j < c - 1; j++) {
-						cout << "═══╬";
+						cout << "═ ═ ═ ╬ ";
 						Sleep(m);
 					}
-					cout << "═══╣";
+					cout << "═ ═ ═ ╣ ";
 					cct_setcolor();
 					cout << endl;
 				}
@@ -763,18 +772,18 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 					cout << "      ";
 					Sleep(m);
 				}
-				cout << "║";
+				cout << " ║ ";
 				cct_setcolor();
 				cout << endl;
 
 				cout << (char)(i + 'A') << ' ';
 				cct_setcolor(15, 0);
-				cout << "║";
+				cout << "║ ";
 				for (int j = 0; j < c; j++) {
 					cout << "      ";
 					Sleep(m);
 				}
-				cout << "║";
+				cout << "║ ";
 				cct_setcolor();
 				cout << endl;
 
@@ -785,9 +794,9 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 					cout << "      ";
 					Sleep(m);
 				}
-				cout << "║";
-				cct_setcolor();
+				cout << " ║ ";
 				cout << endl;
+				cct_setcolor();
 			}
 
 	}
@@ -797,36 +806,32 @@ void print_canvas(int(*s)[11], int r, int c, int grid, int speed, int mode)
 	if (mode == 2) {
 		cct_getxy(x, y);
 		cct_gotoxy(2, y);
-		cout << "╚═";
+		cout << "╚ ═ ";
 	}
 	else
-		cout << "╚";
+		cout << "╚ ";
 	for (int i = 1; i < c; i++) {
 		Sleep(m);
 		if (grid) {
 			if (mode == 2)
-				cout << "══╩═";
+				cout << "═ ═ ╩ ═ ";
 			else
-				cout << "═╩"; // "═╩";
+				cout << "═ ╩ "; // "═╩";
 		}
 		else {
 			if (mode == 2)
-				cout << "═══";
+				cout << "═ ═ ═ ";
 			else
-				cout << "═";
+				cout << "═ ";
 		}
 	}
 	if (mode == 2) {
-		cout << "══╝" << endl;
-		//cct_getxy(x, y);
-		//cout << x << endl;
-		//cout << y << endl;
+		cout << "═ ═ ╝ " << endl;
 	}
 	else
-		cout << "═╝" << endl;
-	cct_setcolor(0);
+		cout << "═ ╝ " << endl;
+	//cct_setcolor(0);
 }
-
 
 void print_circle(int(*s)[11], int r, int c, int grid, int(*h)[11], int speed, int option)
 {
@@ -923,6 +928,8 @@ void print_star(int(*s)[11], int r, int c, int grid, int mode)
 	int color[6] = { -1, 6, 7, 8, 9, 10};
 	int x, y;
 	int change = 0;
+	if (!s[r][c])
+		return;
 	if (mode) {
 		x = (2 * grid + 6) * c - 2 - 2 * grid, y = (3 + grid) * r - grid;
 		if (mode == 1)
@@ -931,11 +938,11 @@ void print_star(int(*s)[11], int r, int c, int grid, int mode)
 		if (mode == 2)
 			cct_setcolor(15, 15);
 		cct_gotoxy(x, y);
-		cout << "╔═╗" << endl;
+		cout << "╔ ═ ╗ " << endl;
 		cct_gotoxy(x, y + 1);
-		cout << "║  ║" << endl;
+		cout << "║   ║ " << endl;
 		cct_gotoxy(x, y + 2);
-		cout << "╚═╝" << endl;
+		cout << "╚ ═ ╝ " << endl;
 		cct_gotoxy(x + 2, y + 1);
 		cout << "★";
 		cct_setcolor();
@@ -950,11 +957,11 @@ void print_star(int(*s)[11], int r, int c, int grid, int mode)
 				//cct_setcolor(15, 15);
 				cct_gotoxy(x, y);
 				cct_gotoxy(x, y);
-				cout << "╔═╗" << endl;
+				cout << "╔ ═ ╗ " << endl;
 				cct_gotoxy(x, y + 1);
-				cout << "║  ║" << endl;
+				cout << "║   ║ " << endl;
 				cct_gotoxy(x, y + 2);
-				cout << "╚═╝" << endl;
+				cout << "╚ ═ ╝ " << endl;
 				cct_gotoxy(x + 2, y + 1);
 				cout << "★";
 				cct_setcolor();
@@ -965,18 +972,21 @@ void print_star(int(*s)[11], int r, int c, int grid, int mode)
 void n_star(int x, int y, int e, int change)
 {
 	int color[6] = { -1, 6, 7, 8, 9, 10 };
+	if (e < 1 || e>5)
+		return;
 	cct_setcolor(color[e], change);
 	cct_gotoxy(x - 2, y - 1);
 	cct_getxy(x, y);
-	cout << "╔═╗" << endl;
+	cout << "╔ ═ ╗ " << endl;
 	cct_gotoxy(x, y + 1);
-	cout << "║  ║" << endl;
+	cout << "║   ║ " << endl;
 	cct_gotoxy(x, y + 2);
-	cout << "╚═╝" << endl;
+	cout << "╚ ═ ╝ " << endl;
 	cct_gotoxy(x + 2, y + 1);
 	cout << "★";
 	cct_setcolor(default_bg);
 }
+
 void lan(int(*s)[11], int j, int w, int lie, int hang, int helper_down)
 {
 	int m = 5;
@@ -998,33 +1008,36 @@ void lan(int(*s)[11], int j, int w, int lie, int hang, int helper_down)
 	Sleep(m);
 	cct_setcolor(15, 0);
 	cct_gotoxy(lie, hang);
-	cout << "═";
+	cout << "═ ";
 }
+
 void drop(int(*s)[11], int ir, int ic, int grid, int mode, int step = -1)
 {
 	int color[6] = { -1, 6, 7, 8, 9, 10 };
-	int x, y;
+	int x, y, stride = 0, acc = 0;
 	if (mode == 1) {
+		if (!s[ir][ic])
+			return;
 		for (int n = 0; n < step; n++) {
 			for (int j = 1; j <= 3 + grid; j++) {
 				x = (2 * grid + 6) *ic - 2 - 2 * grid, y = (3 + grid) * (ir + n) - grid + j;
 				cct_setcolor(color[s[ir][ic]], 0);
 				cct_gotoxy(x, y);
-				cout << "╔═╗" << endl;
+				cout << "╔ ═ ╗ " << endl;
 				cct_gotoxy(x, y + 1);
-				cout << "║  ║" << endl;
+				cout << "║   ║ " << endl;
 				cct_gotoxy(x, y + 2);
-				cout << "╚═╝" << endl;
+				cout << "╚ ═ ╝ " << endl;
 				cct_gotoxy(x + 2, y + 1);
 				cout << "★";
 				cct_setcolor(15, 15);
 				cct_gotoxy(x, y - 1);
-				cout << "╔═╗" << endl;
+				cout << "╔ ═ ╗ " << endl;
 				cct_setcolor();
-				if (j == 3 + grid) {
+				if (j == 3 + grid && grid) {
 					cct_setcolor(15, 0);
 					cct_gotoxy(x, y - 1);
-					cout << "═══" << endl;
+					cout << "═ ═ ═" << endl;
 					cct_setcolor();
 				}
 				Sleep(3);
@@ -1035,6 +1048,7 @@ void drop(int(*s)[11], int ir, int ic, int grid, int mode, int step = -1)
 
 	else if (mode == 2) {
 		int m[11] = { -1 };
+		int n[11] = { -1 };
 		for (int j = 1; j <= ic; j++) {
 			for (int o = 1; o <= ir; o++) {
 				if (s[o][j] != 0) {
@@ -1042,39 +1056,61 @@ void drop(int(*s)[11], int ir, int ic, int grid, int mode, int step = -1)
 					break;
 				}
 				m[j] = 1;
-
 			}
-	
 		}
 		for (int j = 1; j <= ic; j++) {
 			if (m[j] == 1) {
-				//for()
-				for (int i = 1; i <= 2 * grid + 6; i++) {
-					x = (2 * grid + 6) * ic - 2 - 2 * grid - i, y = (3 + grid) * j - grid;
-					cct_setcolor(color[s[ir][ic]], 0);
-					cct_gotoxy(x, y);
-					cout << "╔═╗" << endl;
-					cct_gotoxy(x, y + 1);
-					cout << "║  ║" << endl;
-					cct_gotoxy(x, y + 2);
-					cout << "╚═╝" << endl;
-					cct_gotoxy(x + 2, y + 1);
-					cout << "★";
-					cct_setcolor(15, 15);
-					cct_gotoxy(x + 6, y + 0);
-					cout << ' ';
-					cct_gotoxy(x + 6, y + 1);
-					cout << ' ';
-					cct_gotoxy(x + 6, y + 2);
-					cout << ' ';
-					cct_setcolor();
-					Sleep(1);
+				stride++;
+				n[j] = 0;
+			}
+			else {
+				acc += stride;
+				n[j] = acc;
+				stride = 0;
+			}
+		}
+		for (int j = 1; j <= ic; j++) {
+			if (n[j]) {
+				for (int iir = 1; iir <= ir; iir++) {
+					if (s[iir][j]) {
+						for (int i = 1; i <= (2 * grid + 6)*n[j]; i++) {
+							x = (2 * grid + 6) * j - 2 - 2 * grid - i, y = (3 + grid) * iir - grid;
+							cct_gotoxy(x, y);
+							cct_setcolor(color[s[iir][j]], 0);
+							cout << "╔ ═ ╗ " << endl;
+							cct_gotoxy(x, y + 1);
+							cout << "║   ║ " << endl;
+							cct_gotoxy(x, y + 2);
+							cout << "╚ ═ ╝ " << endl;
+							cct_gotoxy(x + 2, y + 1);
+							cout << "★";
+							cct_setcolor(15, 15);
+							cct_gotoxy(x + 6, y + 0);
+							cout << ' ';
+							cct_gotoxy(x + 6, y + 1);
+							cout << ' ';
+							cct_gotoxy(x + 6, y + 2);
+							cout << ' ';
+							Sleep(1);
+							if (grid && !(i % (2 * grid + 6))) {
+								cct_setcolor(15, 0);
+								cct_gotoxy(x + 6, y + 0);
+								cout << "║";
+								cct_gotoxy(x + 6, y + 1);
+								cout << "║";
+								cct_gotoxy(x + 6, y + 2);
+								cout << "║";
+								cct_setcolor();
+							}
+						}
+					}
 				}
 			}
 		}
-
 	}
 }
+
+
 
 void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 {
@@ -1104,13 +1140,11 @@ void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 
 		cct_gotoxy(lie, hang); //到达底部往上遍历
 		for (int i = r; i > 0; i--) {
-			
 			int helper_star = 0;
 			if (h[i][j] == 1) {
 				int helper_star = 0;
 				step = 0;
 				for (w = i; w > 0; w--) {
-
 					if (h[w][j] == 1) {
 						step++;
 					}
@@ -1134,6 +1168,7 @@ void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 							lan(s, j, w, lie, hang, helper_down);
 						else if(!helper_star) {
 							helper_star = 1;
+							step = max(((already_bottom - already_up) / (grid+3) - 1), step);
 							drop(s, w, j, grid, 1, step);
 						}
 
@@ -1165,8 +1200,9 @@ void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 							lan(s, j, i, lie, hang, helper_down);
 						else if (!helper_star) {
 							helper_star = 1;
-							drop(s, i, j, grid, 1, step);
-
+							step = max(((already_bottom - already_up) /(grid+ 3) - 1), step);
+							if (s[i][j])
+								drop(s, i, j, grid, 1, step);
 						}
 						if (mode == 1)
 							hang += 2;
@@ -1190,7 +1226,7 @@ void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 			if (mode == 1)
 				i = min(i, already_up / 2);
 			else
-				i = min(i, already_up / (3 + grid));
+				i = min(i, (already_up+1) / (3 + grid));
 			
 		}
 	}
@@ -1199,7 +1235,7 @@ void falling_down(int(*s)[11], int r, int c, int(*h)[11], int mode, int grid)
 }
 
 
-void location_2(int (*s)[11], int r, int c, int grid, int mode)
+int location_2(int (*s)[11], int r, int c, int grid, int mode)
 {
 	int first = 0, prompt = 0;
 	// 箭头键/鼠标移动，回车键/单击左键选择, Q/单击右键结束
@@ -1207,6 +1243,9 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 	// 箭头键/鼠标移动取消当前选择，回车键/单击左键合成                                                                                    
 	// 本次得分:125 总分:125
 	// 周围无相同值，箭头键/鼠标移动，回车键/单击左键选择, Q/单击右键结束
+
+	// 剩余*个星星，无可消除项，本关结束！回车继续下一关
+	// 奖励得分:720 总分: XXX 我想写在别的地方！！！
 	int x = 6, y = 4, X = 0, Y = 0;
 	int ret, maction, keycode1, keycode2;
 	int loop = 1;
@@ -1215,17 +1254,17 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 	int sel = 0;
 	int inval = 0;
 	int total = 0;
+	int num = 0;
 	int rest = r * c;
 	int h[11][11] = { -12 };
 	int sx = 0, sy = 0;
 	while (loop) {
-
-		int num = 0;
+		num = 0;
 		ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
 		cct_setcursor(CURSOR_INVISIBLE);
 		if (ret == CCT_MOUSE_EVENT) {
 			if (sx == X && sy == Y) {
-
+				;
 			}
 			else {
 				//恢复
@@ -1242,8 +1281,6 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 			sx = X;
 			sy = Y;
 
-
-
 			int check = 1;
 			if (grid) {
 				if (Y > 2 && Y < 4 + (r - 1) * (3 + grid) + 2 && X>2 && X < 6 + (c - 1) * (6 + 2 * grid) + 4) {
@@ -1257,7 +1294,9 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 				else
 					check = 0;
 			}
-			if (check) {
+			if (check && s[((Y - 3) / (grid + sh)) + 1][(X - 4) / (2 * grid + sw) + 1]) {
+				if (maction == MOUSE_RIGHT_BUTTON_CLICK) 
+					return 0;
 				if (Y > 2 && Y < 4 + (r - 1) * (3 + grid) + 2
 					&& X >2 && X < 6 + (c - 1) * (6 + 2 * grid) + 4) {
 					int x15 = 6 + ((X - 4) / (sw + 2 * grid)) * (6 + 2 * grid);
@@ -1342,15 +1381,16 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 									sel = 0;
 									score(r, c, h, &num, &total, &rest);
 									cct_gotoxy(0, 0);
-									cout << "                                                              ";
+									cout << "                                 ";
 									cct_gotoxy(0, 0);
 									cout << "本次得分：" << num << " 总得分：" << total;
 
 									//cct_gotoxy(0, (3 + grid)* r + (4 - grid));
 									cct_gotoxy(0, (3 + grid) * r + (4 - grid));
-									cout << "合成完成，回车键/单击左键下落0" << "                                                              ";
+									if (!grid)
+										cout << "合成完成，回车键/单击左键下落0" << "                                                              ";
 									// flag
-									while (1) {
+									while (!grid) {
 										ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
 
 										if (ret == CCT_MOUSE_EVENT && (maction == MOUSE_LEFT_BUTTON_CLICK || maction == MOUSE_LEFT_BUTTON_DOUBLE_CLICK || maction == MOUSE_LEFTRIGHT_BUTTON_CLICK || maction == FROM_LEFT_2ND_BUTTON_PRESSED))
@@ -1366,10 +1406,33 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 									remove_0(s, r, c, h, 0, 's');
 									drop(s, r, c, grid, 2);
 									remove_0(s, r, c, h, 2);
-
+									// 检查继续性
+									int helper_3 = check_3(s, r, c, h);
+									if (!helper_3) {
+										num = 0;
+										in_h(h);
+										score(r, c, h, &num, &total, &rest, 0);
+										cct_gotoxy(0, 0);
+										cout << "                                 ";
+										cct_gotoxy(0, 0);
+										if (180 * (10 - rest) > 0)
+											cout << "奖励得分：" << 180 * (10 - rest) << " 总得分：" << total;
+										else
+											cout << "奖励得分：" << 0 << " 总得分：" << total;
+										cct_setcolor(0);
+										cct_gotoxy(0, (3 + grid)* r + (4 - grid));
+										cout << "剩余" << rest << "个星星，无可消除项，本关结束！回车继续下一关";
+										while (grid) {
+											ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
+											if (ret == CCT_KEYBOARD_EVENT && keycode1 == 13)
+												break;
+										}
+										return 27;
+									}
 									//in_h(h);
 
 									//cct_gotoxy(0, (3 + grid)* r + (4 - grid));
+									cct_setcolor(0);
 									cct_gotoxy(0, (3 + grid) * r + (4 - grid));
 									cout << "本次合成结束， 按C/单击左键继续新一次合成；" << "                                                              ";
 									while (1) {
@@ -1418,8 +1481,6 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 					first = 1;
 				}
 				cct_gotoxy(0, (3 + grid) * r + (4 - grid));
-				// 	cct_gotoxy(0, 4 * r + 3);
-				// 	cct_gotoxy(0, 3 * r + 4);
 				cout << "[当前鼠标] 位置非法" << "                                                      ";
 			}
 		}
@@ -1432,20 +1493,13 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 				cct_showch(0, (3 + grid) * r + (4 - grid), ' ', 0, 80);
 				cct_setcolor(default_bg);
 			}
-
-			//cct_gotoxy(0, (3 + grid)* r + (4 - grid));
 			cct_gotoxy(0, (3 + grid) * r + (4 - grid));
-			//
-			//
-			//
-
 			switch (keycode1) {
 				case 224:
 					n_star(x, y, s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1], 0);
 					//恢复
 					for (int i = 1; i <= r; i++) {
 						for (int j = 1; j <= c; j++) {
-							// void print_star(int(*s)[11], int r, int c, int grid, int mode = 0);
 							if (h[i][j]) {
 								print_star(s, i, j, grid, 3);
 							}
@@ -1456,38 +1510,46 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 
 					switch (keycode2) {
 						case KB_ARROW_UP:
-
-							if (y == 4)
-								y = 4 + (r - 1) * (3 + grid);
-							else
-								y -= sh + grid;
-
+							do {
+								if (y == 4)
+									y = 4 + (r - 1) * (3 + grid);
+								else
+									y -= sh + grid;
+							} while (!s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]);
 							break;
+
 						case KB_ARROW_DOWN:
-							if (y == 4 + (r - 1) * (3 + grid))
-								y = 4;
-							else
-								y += sh + grid;
+							do {
+								if (y == 4 + (r - 1) * (3 + grid))
+									y = 4;
+								else
+									y += sh + grid;
+							} while (!s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]);
 							break;
+						
 						case KB_ARROW_LEFT:
-							if (x == 6)
-								x = 6 + (c - 1) * (6 + 2 * grid);
-							else
-								x -= sw + 2 * grid;
-
+							do {
+								if (x == 6)
+									x = 6 + (c - 1) * (6 + 2 * grid);
+								else
+									x -= sw + 2 * grid;
+							} while (!s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]);
 							break;
-						case KB_ARROW_RIGHT:
-							if (x == 6 + (c - 1) * (6 + 2 * grid))
-								x = 6;
-							else
-								x += sw + 2 * grid;
 
+						case KB_ARROW_RIGHT:
+							do {
+								if (x == 6 + (c - 1) * (6 + 2 * grid))
+									x = 6;
+								else
+									x += sw + 2 * grid;
+							} while (!s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]);
 							break;
 					}
-					n_star(x, y, s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1], 15);
-					//cct_gotoxy(0, (3 + grid)* r + (4 - grid));
-					cct_gotoxy(0, (3 + grid) * r + (4 - grid));
-					cout << "[当前键盘]" << (char)('A' + (y - 3) / (grid + sh)) << "行" << (x - 4) / (2 * grid + sw) << "列" << "                                                      ";
+					if (s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]) {
+						n_star(x, y, s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1], 15);
+						cct_gotoxy(0, (3 + grid)* r + (4 - grid));
+						cout << "[当前键盘]" << (char)('A' + (y - 3) / (grid + sh)) << "行" << (x - 4) / (2 * grid + sw) << "列" << "                                                      ";
+					}
 					break;
 
 
@@ -1529,14 +1591,17 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 								sel = 0;
 								score(r, c, h, &num, &total, &rest);
 								cct_gotoxy(0, 0);
-								cout << "                                                              ";
+								cout << "                                 ";
 								cct_gotoxy(0, 0);
 								cout << "本次得分：" << num << " 总得分：" << total;
 
-								cct_gotoxy(0, (3 + grid) * r + (4 - grid));
-								cout << "合成完成，回车键/单击左键下落0" << "                                                              ";
+								if (!grid) {
+									cct_gotoxy(0, (3 + grid) * r + (4 - grid));
+									cout << "合成完成，回车键/单击左键下落0" << "                                                              ";
+								}
+
 								// flag
-								while (1) {
+								while (!grid) {
 									ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
 
 									if (ret == CCT_MOUSE_EVENT && (maction == MOUSE_LEFT_BUTTON_CLICK || maction == MOUSE_LEFT_BUTTON_DOUBLE_CLICK || maction == MOUSE_LEFTRIGHT_BUTTON_CLICK || maction == FROM_LEFT_2ND_BUTTON_PRESSED))
@@ -1552,9 +1617,31 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 								remove_0(s, r, c, h, 0, 's');
 								drop(s, r, c, grid, 2);
 								remove_0(s, r, c, h, 2);
-
+								// 检查继续性
+								int helper_3 = check_3(s, r, c, h);
+								if (!helper_3) {
+									num = 0;
+									in_h(h);
+									score(r, c, h, &num, &total, &rest, 0);
+									cct_gotoxy(0, 0);
+									cout << "                                 ";
+									cct_gotoxy(0, 0);
+									if(180 * (10 - rest)>0)
+										cout << "奖励得分：" << 180 * (10 - rest) << " 总得分：" << total;
+									else
+										cout << "奖励得分：" << 0 << " 总得分：" << total;
+									cct_setcolor(0);
+									cct_gotoxy(0, (3 + grid)* r + (4 - grid));
+									cout << "剩余" << rest << "个星星，无可消除项，本关结束！回车继续下一关";
+									while (grid) {
+										ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
+										if (ret == CCT_KEYBOARD_EVENT && keycode1 == 13)
+											break;
+									}
+									return 27;
+								}
 								//in_h(h);
-
+								cct_setcolor(0);
 								cct_gotoxy(0, (3 + grid) * r + (4 - grid));
 								cout << "本次合成结束， 按C/单击左键继续新一次合成；" << "                                                              ";
 								while (1) {
@@ -1598,10 +1685,13 @@ void location_2(int (*s)[11], int r, int c, int grid, int mode)
 					break;
 			}
 		}
+
+
 	}
 
 	cct_disable_mouse();
 	cct_setcursor(CURSOR_VISIBLE_NORMAL);
+	return 0;
 }
 
 void score(int r, int c, int (*h)[11], int* num, int* total, int* rest, int mode)

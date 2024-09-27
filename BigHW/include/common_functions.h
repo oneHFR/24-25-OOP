@@ -71,7 +71,7 @@ void lan(int(*s)[11], int j, int w, int lie, int hang, int helper_down);
 //void drop(int(*s)[11], int ir, int ic, int grid);
 
 /*------------------------------ Ðü¸¡Çø----------------------------------*/
-void location_2(int (*s)[11], int r, int c, int grid, int mode =1);
+int location_2(int (*s)[11], int r, int c, int grid, int mode =1);
 
 /*magic_ball*/
 void enter_option(int option, int r);
