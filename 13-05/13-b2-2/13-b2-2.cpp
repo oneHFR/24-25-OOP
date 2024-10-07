@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+//#define _CRTDBG_MAP_ALLOC
+//#include <crtdbg.h>
 using namespace std;
 
 struct student {
@@ -58,6 +60,7 @@ void output(struct student* stu, int num)
 
 int main()
 {
+    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     ifstream infile;
     infile.open("./student.txt", ios::in);
     if (!infile) {
