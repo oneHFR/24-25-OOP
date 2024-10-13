@@ -28,7 +28,7 @@ int main()
 
 	CONSOLE_GRAPHICS_INFO G2048_CGI;
 
-	const BLOCK_DISPLAY_INFO bdi_normal[] = {
+	const BLOCK_DISPLAY_INFO bdi[] = {
 	{BDI_VALUE_BLANK, -1, -1, NULL},  // 0空格
 	{2, COLOR_HYELLOW, COLOR_BLACK, NULL},
 	{4, COLOR_HRED, COLOR_BLACK, NULL},
@@ -47,16 +47,27 @@ int main()
 
 	while (1) {
 		int s[MAX_ROW][MAX_COL] = { 0 };
-		int maxscore = 0, t = 0;
+		int maxscore = 0, t = 512;
 		cct_setcolor();
 		cct_cls();
-		init(&G2048_CGI);
-		input_parameter(&G2048_CGI, &t);
+		init(&G2048_CGI, 1);
 		gmw_draw_frame(&G2048_CGI);
-		new_one(&G2048_CGI, s);
+
+		//input_parameter(&G2048_CGI, &t);
+		G2048_CGI.row_num = 5;
+		G2048_CGI.col_num = 4;
+		G2048_CGI.delay_of_block_moved = 0;
+		G2048_CGI.delay_of_block_moved = BLOCK_MOVED_DELAY_MS + 5 * G2048_CGI.delay_of_block_moved;
+		/*用缺省值初始化（窗口背景黑/前景白，点阵16*8，上下左右无额外行列，上下状态栏均有，无行号/列标，框架线型为双线，色块宽度2/高度1/无小边框，颜色略）*/
+		init(&G2048_CGI, 2);
+		gmw_draw_frame(&G2048_CGI);
+
+		new_one(&G2048_CGI, s, bdi);
+		new_one(&G2048_CGI, s, bdi);
+
+		game(&G2048_CGI, s, bdi, t);
 
 		int x, y;
-		cout << "\n本小题结束，请输入End继续...";
 		cct_getxy(x, y);
 		while (1) {
 			char keepon[1024] = { 0 };

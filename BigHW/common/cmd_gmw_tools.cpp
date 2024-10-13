@@ -961,9 +961,12 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO* const pCGI)
 			Sleep(pCGI->delay_of_draw_frame);
 		}
 	}
+
+
+
 	//Î²ÐÐ
 	cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, pCGI->extern_up_lines + pCGI->draw_frame_with_col_no + pCGI->SLI.is_top_status_line + pCGI->CFI.bhigh - 1);
-	//cout << pCGI->CFI.lower_left;
+	cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, pCGI->extern_up_lines + pCGI->draw_frame_with_col_no + pCGI->SLI.is_top_status_line + pCGI->CFI.bhigh - 1);
 	gmw_inner_simple_showstr(pCGI->CFI.lower_left, 1, strlen(pCGI->CFI.lower_left));  // Êä³ö×óÏÂ½Ç×Ö·û
 	for (int j = 0; j < pCGI->col_num; j++) {
 		for (int c = 0; c < pCGI->CFI.block_width; c += 2)

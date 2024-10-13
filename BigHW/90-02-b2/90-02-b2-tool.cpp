@@ -113,7 +113,7 @@ void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 
 }
 
-int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
+int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi)
 {
 	int already = 0;
 	for (int i = 0; i < pCGI->row_num; i++)
@@ -128,6 +128,14 @@ int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 			int r_j = rand() % pCGI->col_num;
 			if (!s[r_i][r_j]) {
 				s[r_i][r_j] = 2;
+				/*
+				  输入参数：const CONSOLE_GRAPHICS_INFO *const pCGI	：整体结构指针
+				   const int row_no						：行号（从0开始，人为保证正确性，程序不检查）
+				   const int col_no						：列号（从0开始，人为保证正确性，程序不检查）
+				   const int bdi_value						：需要显示的值
+				   const BLOCK_DISPLAY_INFO *const bdi		：存放该值对应的显示信息的结构体数组
+				*/
+				gmw_draw_block(pCGI, r_i, r_j, s[r_i][r_j], bdi);
 				break;
 			}
 		}
@@ -135,7 +143,7 @@ int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 	}
 }
 
-void init(CONSOLE_GRAPHICS_INFO* const pCGI)
+void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 {
 	/*
 		  输入参数：CONSOLE_GRAPHICS_INFO *const pCGI：整体结构指针
@@ -186,14 +194,22 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI)
 	return 0; //此句可根据需要修改
 }
 	*/
+	if (mode == 1) {
+		gmw_init(pCGI);
+		gmw_set_font(pCGI, "新宋体", 16);
+		gmw_set_frame_style(pCGI, 8, 2, false);
+		gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);
+		gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);
+	}
 
-	gmw_init(pCGI);
-	gmw_set_font(pCGI, "新宋体", 16);
-	gmw_set_frame_style(pCGI, 8, 2, false);
-	gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);
-	gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);
-	gmw_draw_frame(pCGI);
-	gmw_set_frame_style(pCGI, 10, 5, true);
+	else if (mode == 2) {
+		gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);			//整个窗口颜色
+		gmw_set_font(pCGI, "新宋体", 16);						//字体
+		gmw_set_frame_style(pCGI, 10, 5, true);					//游戏主区域风格：每个色块宽10高5，有分隔线【数字色块带边框，宽度为10(放最多6位数字)，高度为5(为了保持色块为方形)】
+		gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);	//游戏主区域颜色
+		gmw_set_block_border_switch(pCGI, true);				//小色块带边框
+	}
+
 
 	//gmw_set_color(&G2048_CGI, COLOR_BLACK, COLOR_WHITE);
 	//gmw_set_delay(&G2048_CGI, 1, 0);
@@ -216,6 +232,211 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI)
 
 
 }
+
+// 通用的方块移动和合并函数
+ void move_and_merge_blocks(CONSOLE_GRAPHICS_INFO* const pCGI, int s[][MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int direction, int* check_change)
+{
+	int distance; // 记录方块可以移动的距离
+
+	if (direction == KB_ARROW_UP) {  // 上移
+		for (int j = 0; j < pCGI->col_num; j++) {
+			distance = 0;
+			for (int i = 0; i < pCGI->row_num; i++) {
+				if (s[i][j] == 0) {
+					distance++;
+				}
+				else {
+					// 移动方块
+					gmw_move_block(pCGI, i, j, s[i][j], s[i][j], bdi, DOWN_TO_UP, distance);
+					s[i - distance][j] = s[i][j];
+					if (distance > 0) s[i][j] = 0;
+
+					// 合并相邻相同的方块
+					if (i - distance > 0 && s[i - distance][j] == s[i - distance - 1][j]) {
+						s[i - distance - 1][j] *= 2;
+						s[i - distance][j] = 0;
+						gmw_draw_block(pCGI, i - distance, j, s[i - distance][j], bdi);
+						gmw_draw_block(pCGI, i - distance - 1, j, s[i - distance - 1][j], bdi);
+						distance++; // 合并后增加距离
+					}
+					*check_change = distance > 0 ? 1 : *check_change;
+				}
+			}
+		}
+	}
+	else if (direction == KB_ARROW_DOWN) {  // 下移
+		for (int j = 0; j < pCGI->col_num; j++) {
+			distance = 0;
+			for (int i = pCGI->row_num - 1; i >= 0; i--) {
+				if (s[i][j] == 0) {
+					distance++;
+				}
+				else {
+					// 移动方块
+					gmw_move_block(pCGI, i, j, s[i][j], s[i][j], bdi, UP_TO_DOWN, distance);
+					s[i + distance][j] = s[i][j];
+					if (distance > 0) s[i][j] = 0;
+
+					// 合并相邻相同的方块
+					if (i + distance < pCGI->row_num - 1 && s[i + distance][j] == s[i + distance + 1][j]) {
+						s[i + distance + 1][j] *= 2;
+						s[i + distance][j] = 0;
+						gmw_draw_block(pCGI, i + distance, j, s[i + distance][j], bdi);
+						gmw_draw_block(pCGI, i + distance + 1, j, s[i + distance + 1][j], bdi);
+						distance++;
+					}
+					*check_change = distance > 0 ? 1 : *check_change;
+				}
+			}
+		}
+	}
+	else if (direction == KB_ARROW_LEFT) {  // 左移
+		for (int i = 0; i < pCGI->row_num; i++) {
+			distance = 0;
+			for (int j = 0; j < pCGI->col_num; j++) {
+				if (s[i][j] == 0) {
+					distance++;
+				}
+				else {
+					// 移动方块
+					gmw_move_block(pCGI, i, j, s[i][j], s[i][j], bdi, RIGHT_TO_LEFT, distance);
+					s[i][j - distance] = s[i][j];
+					if (distance > 0) s[i][j] = 0;
+
+					// 合并相邻相同的方块
+					if (j - distance > 0 && s[i][j - distance] == s[i][j - distance - 1]) {
+						s[i][j - distance - 1] *= 2;
+						s[i][j - distance] = 0;
+						gmw_draw_block(pCGI, i, j - distance, s[i][j - distance], bdi);
+						gmw_draw_block(pCGI, i, j - distance - 1, s[i][j - distance - 1], bdi);
+						distance++;
+					}
+					*check_change = distance > 0 ? 1 : *check_change;
+				}
+			}
+		}
+	}
+	else if (direction == KB_ARROW_RIGHT) {  // 右移
+		for (int i = 0; i < pCGI->row_num; i++) {
+			distance = 0;
+			for (int j = pCGI->col_num - 1; j >= 0; j--) {
+				if (s[i][j] == 0) {
+					distance++;
+				}
+				else {
+					// 移动方块
+					gmw_move_block(pCGI, i, j, s[i][j], s[i][j], bdi, LEFT_TO_RIGHT, distance);
+					s[i][j + distance] = s[i][j];
+					if (distance > 0) s[i][j] = 0;
+
+					// 合并相邻相同的方块
+					if (j + distance < pCGI->col_num - 1 && s[i][j + distance] == s[i][j + distance + 1]) {
+						s[i][j + distance + 1] *= 2;
+						s[i][j + distance] = 0;
+						gmw_draw_block(pCGI, i, j + distance, s[i][j + distance], bdi);
+						gmw_draw_block(pCGI, i, j + distance + 1, s[i][j + distance + 1], bdi);
+						distance++;
+					}
+					*check_change = distance > 0 ? 1 : *check_change;
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int t)
+{
+	int loop = 1;
+	int maction, mrow = -1, mcol = -1;
+	int keycode1, keycode2;
+	int ret;
+	int score = 0;
+
+	while (loop) {
+		int distance = 0;
+		int check_change = 0;
+		cct_disable_mouse();
+		ret = gmw_read_keyboard_and_mouse(pCGI, maction, mrow, mcol, keycode1, keycode2);
+		if (keycode1 == 0xe0) {
+			// 根据不同的方向调用通用函数处理
+			switch (keycode2) {
+				case KB_ARROW_UP:
+					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_UP, &check_change);
+					break;
+
+				case KB_ARROW_DOWN:
+					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_DOWN, &check_change);
+					break;
+
+				case KB_ARROW_LEFT:
+					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_LEFT, &check_change);
+					break;
+
+				case KB_ARROW_RIGHT:
+					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_RIGHT, &check_change);
+					break;
+			}
+		}
+
+		// 如果有方块移动，生成新的随机方块
+		if (check_change) {
+			new_one(pCGI, s, bdi);
+		}
+
+		// 更新状态栏显示最大值
+		for (int i = 0; i < pCGI->row_num; i++) {
+			for (int j = 0; j < pCGI->col_num; j++) {
+				score = s[i][j] > score ? s[i][j] : score;
+			}
+		}
+		char temp[30];
+		sprintf(temp, "目前最大值：%d 目标值：%d", score, t);
+		gmw_status_line(pCGI, 0, temp);
+
+		loop = check(pCGI, s);
+
+	}
+}
+
+int check(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
+{
+	// 四周
+	int d_x[4] = { 1, -1, 0, 0 };
+	int d_y[4] = { 0, 0, 1, -1 };
+	int num = 0; // 非空数
+
+	for (int i = 0; i < pCGI->row_num; i++) {
+		for (int j = 0; j < pCGI->col_num; j++) {
+			if (s[i][j] != 0)
+				num++;
+
+			// 检查四周
+			for (int k = 0; k < 4; k++) {
+				int s_i = i + d_x[k];
+				int s_j = j + d_y[k];
+
+				// 检查边界
+				if (s_i >= 0 && s_i < pCGI->row_num && s_j >= 0 && s_j < pCGI->col_num) {
+					//没有死局
+					if (s[i][j] != 0 && s[i][j] == s[s_i][s_j])
+						return 1;
+				}
+			}
+		}
+	}
+
+	// 死局
+	if (num == pCGI->row_num * pCGI->col_num)
+		return 0;
+	else
+		return 1;
+}
+
+
 
 static void to_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
 {
