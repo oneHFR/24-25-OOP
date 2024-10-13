@@ -127,7 +127,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\cmd_console_tools.cpp" />
     <ClCompile Include="..\common\cmd_gmw_tools.cpp" />
+    <ClCompile Include="..\common\common_functions.cpp" />
+    <ClCompile Include="..\common\common_menu.cpp" />
+    <ClCompile Include="90-02-b1-gmw-base.cpp" />
+    <ClCompile Include="90-02-b1-gmw-main.cpp" />
+    <ClCompile Include="90-02-b1-gmw-tool.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\cmd_console_tools.h" />
+    <ClInclude Include="..\include\cmd_gmw_tools.h" />
+    <ClInclude Include="..\include\common_functions.h" />
+    <ClInclude Include="..\include\common_menu.h" />
+    <ClInclude Include="90-02-b1-gmw.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

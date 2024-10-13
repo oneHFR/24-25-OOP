@@ -259,7 +259,7 @@ typedef struct _console_graphics_info_ {
 /* 设置整个窗口的某些参数 */
 int gmw_set_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col);
 int gmw_set_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int bgcolor = COLOR_BLACK, const int fgcolor = COLOR_WHITE, const bool cascade = true);
-int gmw_set_font(CONSOLE_GRAPHICS_INFO *const pCGI, const char *fontname = "Terminal", const int fs_high = 16, const int fs_width = 8);
+int gmw_set_font(CONSOLE_GRAPHICS_INFO *const pCGI, const char *fontname = "新宋体", const int fs_high = 16, const int fs_width = 8); // 我看这里原本是Terminal 文档要求改成新宋体？
 int gmw_set_delay(CONSOLE_GRAPHICS_INFO *const pCGI, const int type, const int delay_ms);
 int gmw_set_ext_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int up_lines = 0, const int down_lines = 0, const int left_cols = 0, const int right_cols = 0);
 

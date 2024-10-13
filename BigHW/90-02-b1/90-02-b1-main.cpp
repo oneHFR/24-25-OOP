@@ -1,4 +1,5 @@
 /* 2152131 º∆ø∆ Œ‚∫È»Ô */
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include "../include/cmd_console_tools.h"
 #include <iomanip>

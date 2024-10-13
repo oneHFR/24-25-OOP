@@ -32,5 +32,8 @@
     <ClInclude Include="..\include\cmd_gmw_tools.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\lib_tgmw_tools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

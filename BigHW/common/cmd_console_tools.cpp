@@ -237,7 +237,8 @@ void cct_showstr(const int X, const int Y, const char* str, const int bg_color, 
 	const char* special[] = { "╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬",
 							"┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋",
 							"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪",
-							"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫",
+							"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫", 
+
 							NULL
 	};
 	/* 没有用效率最高的方法，用了比较容易读懂的方法 */
@@ -247,8 +248,10 @@ void cct_showstr(const int X, const int Y, const char* str, const int bg_color, 
 			rpt_count++;
 		}
 
-		if (rpt_count >= rpt) //如果超过了rpt次数则用空格填充
+		if (rpt_count >= rpt) { //如果超过了rpt次数则用空格填充
 			putchar(' ');
+			continue;
+		}
 
 		/* 如果未到字符串尾部且不是最后一个字符，则判断是否边框线 */
 		if ((*p != '\0') && (*(p + 1) != '\0')) {

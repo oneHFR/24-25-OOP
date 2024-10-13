@@ -151,13 +151,13 @@ static void test_by_fixed(void)
 		游戏区域为双线框，带分隔线，色块大小为2（宽度2列=1个汉字）*1（高度1行），颜色同窗口
 		色块为双框线，颜色（未完）		*/
 	gmw_init(&MyCGI);
-
+	// flag
 	if (1) {
 		/* 显示初始化的框架 */
 		gmw_draw_frame(&MyCGI);
 
 		/* 上状态栏显示内容 */
-		sprintf(temp, "测试1 - 窗口大小：%d行 %d列", MyCGI.lines, MyCGI.cols);
+		sprintf(temp, "测试1 - 窗口大小：%d行 %d列 ", MyCGI.lines, MyCGI.cols);
 		gmw_status_line(&MyCGI, TOP_STATUS_LINE, temp);
 
 		/* 下状态栏显示内容 */
@@ -173,57 +173,58 @@ static void test_by_fixed(void)
 		cout << "测试2比较耗时，是否进行[0/1] : ";
 		cin >> sel;
 		if (sel == 1) {
-		const int row = 6, col = 7;
-		/* 在初始化框架的基础上修改：
-			游戏区域大小
-			额外行列
-			窗口颜色
-			字体字号
-			每个游戏块的大小
-			显示行号
-			显示列标
-			设置延时	*/
-		gmw_set_rowcol(&MyCGI, row, col);					//游戏区域6*7
-		gmw_set_ext_rowcol(&MyCGI, 3, 4, 10, 20);				//设置额外行列
-		gmw_set_color(&MyCGI, COLOR_BLUE, COLOR_HGREEN);		//修改窗口颜色并级联修改游戏区域、上下状态栏
-		gmw_set_font(&MyCGI, "新宋体", 16, 0);				//TrueType字体（新宋体）宽度不需要，可任意设置
-		gmw_set_frame_style(&MyCGI, 6, 3, true);				//每个色块区域宽度6列*高度3列，要分隔线
-		gmw_set_frame_default_linetype(&MyCGI, 2);			//设置框架线型为预置值2（全部为单线）
-		gmw_set_rowno_switch(&MyCGI, true);					//显示行号
-		gmw_set_colno_switch(&MyCGI, true);					//显示列标
-			gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 200);		//画边框的延时
-		gmw_set_block_border_switch(&MyCGI, true);			//设置色块需要小边框
+			const int row = 6, col = 7;
+			/* 在初始化框架的基础上修改：
+				游戏区域大小
+				额外行列
+				窗口颜色
+				字体字号
+				每个游戏块的大小
+				显示行号
+				显示列标
+				设置延时	*/
+			gmw_set_rowcol(&MyCGI, row, col);					//游戏区域6*7
+			gmw_set_ext_rowcol(&MyCGI, 3, 4, 10, 20);				//设置额外行列
+			gmw_set_color(&MyCGI, COLOR_BLUE, COLOR_HGREEN);		//修改窗口颜色并级联修改游戏区域、上下状态栏
+			gmw_set_font(&MyCGI, "新宋体", 16, 0);				//TrueType字体（新宋体）宽度不需要，可任意设置
+			gmw_set_frame_style(&MyCGI, 6, 3, true);				//每个色块区域宽度6列*高度3列，要分隔线
+			gmw_set_frame_default_linetype(&MyCGI, 2);			//设置框架线型为预置值2（全部为单线）
+			gmw_set_rowno_switch(&MyCGI, true);					//显示行号
+			gmw_set_colno_switch(&MyCGI, true);					//显示列标
+			gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 2);		//画边框的延时 // flag
+			gmw_set_block_border_switch(&MyCGI, true);			//设置色块需要小边框
 
-		/* 显示框架 */
-		gmw_draw_frame(&MyCGI);
+			/* 显示框架 */
+			gmw_draw_frame(&MyCGI);
 
-		/* 上状态栏显示内容 */
-		sprintf(temp, "测试2 - 窗口大小：%d行 %d列", MyCGI.lines, MyCGI.cols);
-		gmw_status_line(&MyCGI, TOP_STATUS_LINE, temp);
+			/* 上状态栏显示内容 */
+			sprintf(temp, "测试2 - 窗口大小：%d行 %d列", MyCGI.lines, MyCGI.cols);
+			gmw_status_line(&MyCGI, TOP_STATUS_LINE, temp);
 
-		/* 向框架中填充色块 */
-		{
-			const BLOCK_DISPLAY_INFO bdi[] = {
-				{BDI_VALUE_BLANK, -1, -1, "  "},						//0不显示，用空格填充即可
-				{1,  COLOR_HBLACK, -1, "〇"},				//如果给出数字1，则显示空心球
-				{2,  COLOR_HBLUE, COLOR_HYELLOW, "◎"},	//如果给出数字2，则显示双线空心球
-				{3,  COLOR_HCYAN, COLOR_GREEN, "★"},		//如果给出数字3，则显示星
-				{4,  COLOR_HRED, -1, NULL},				//如果给出数字4，则直接显示4（NULL表示直接显示数字）
-				{BDI_VALUE_END, -1, -1, NULL}			//以BDI_VALUE_END结束，一定要有!!!
-			};
-				gmw_set_delay(&MyCGI, DELAY_OF_DRAW_BLOCK, 50);		//画色块的延时
-			int i, j;
-			for (i = 0; i < row; i++)
-				for (j = 0; j < col; j++)
-						gmw_draw_block(&MyCGI, i, j, (i*row + j) % 5, bdi);
-		}
+			/* 向框架中填充色块 */
+			{
+				const BLOCK_DISPLAY_INFO bdi[] = {
+					{BDI_VALUE_BLANK, -1, -1, "  "},						//0不显示，用空格填充即可
+					{1,  COLOR_HBLACK, -1, "〇"},				//如果给出数字1，则显示空心球
+					{2,  COLOR_HBLUE, COLOR_HYELLOW, "◎"},	//如果给出数字2，则显示双线空心球
+					{3,  COLOR_HCYAN, COLOR_GREEN, "★"},		//如果给出数字3，则显示星
+					{4,  COLOR_HRED, -1, NULL},				//如果给出数字4，则直接显示4（NULL表示直接显示数字）
+					{BDI_VALUE_END, -1, -1, NULL}			//以BDI_VALUE_END结束，一定要有!!!
+				};
+				gmw_set_delay(&MyCGI, DELAY_OF_DRAW_BLOCK, 2);		//画色块的延时
+				int i, j;
+				for (i = 0; i < row; i++)
+					for (j = 0; j < col; j++)
+						gmw_draw_block(&MyCGI, i, j, (i * row + j) % 5, bdi);
+			}
 
-		/* 下状态栏显示内容 */
-		gmw_status_line(&MyCGI, LOWER_STATUS_LINE, "输入Quit返回", "显示结束，"); //只是给出提示而已，如果真的想输入Quit，后续还需要加输入及判断
+			/* 下状态栏显示内容 */
+			gmw_status_line(&MyCGI, LOWER_STATUS_LINE, "输入Quit返回", "显示结束，"); //只是给出提示而已，如果真的想输入Quit，后续还需要加输入及判断
 
-		to_be_continued("测试2完毕", &MyCGI);
+			to_be_continued("测试2完毕", &MyCGI);
 		}
 	}
+
 
 	if (1) {
 		/* 在上面基础上继续修改：
@@ -515,7 +516,7 @@ static void test_step_of_color_linez(CONSOLE_GRAPHICS_INFO *pColorLinez_CGI)
 
 	/* 预置一个数组，1-7表示7种不同颜色的球，0表示无 */
 	int cl[row][col] = {
-		{0, 0, 0, 0, 4, 0, 0, 0},
+		{0, 0, 0, 0, 4, 0, 0, 0}, 
 		{0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 2, 0, 0, 0, 7, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0},
@@ -712,7 +713,7 @@ static void test_color_linez(void)
 
 //	gmw_set_ext_rowcol(&ColorLinez_CGI, 3, 2, 10, 10);						//注：不设置附加区域，可能导致to_be_continued打印为两行，此问题未处理（后面同）
 	gmw_set_color(&ColorLinez_CGI, COLOR_BLACK, COLOR_HWHITE);			//整个窗口颜色
-	gmw_set_font(&ColorLinez_CGI, "新宋体", 32);							//字体
+	gmw_set_font(&ColorLinez_CGI, "新宋体", 16);							//字体
 //	gmw_set_frame_style(&ColorLinez_CGI);									//游戏主区域风格：每个色块宽2高1，有分隔线
 	gmw_set_frame_default_linetype(&ColorLinez_CGI, 2);					//游戏主区域线型：单线
 	gmw_set_frame_color(&ColorLinez_CGI, COLOR_HWHITE, COLOR_BLACK);		//游戏主区域颜色
@@ -1434,25 +1435,25 @@ int main(int argc, char** argv)
 	cct_setcursor(CURSOR_INVISIBLE);
 
 	/* 用固定值测试框架 */
-	test_by_fixed();
+	//test_by_fixed();
 
 	/* 用键盘输入值测试框架 */
-	test_by_input();
+	//test_by_input();
 
 	/* 用 color_linez 来测试游戏区域 */
-	test_color_linez();
+	//test_color_linez();
 
 	/* 用 magic_ball 来测试游戏区域 */
-	test_magic_ball();
+	//test_magic_ball();
 
 	/* 用 2048 来测试游戏区域 */
-	test_2048();
+	//test_2048();
 
 	/* 用 合成十 来测试游戏区域 */
 	test_merge_to_10();
 
 	/* 用 消灭星星 来测试游戏区域 */
-	test_popstar();
+	//test_popstar();
 
 	cct_setcolor();
 

@@ -22,12 +22,17 @@ using namespace std;
    -------------------------------------------------- */
 /* 处理符合要求的2字节格式 */
 static void gmw_inner_set_frame_linetyper(char* dest, const char* src); 
+/* 处理默认边框 */
+static void gmw_inner_simple_showstr(const char* str, int rpt, int maxlen);
 /* 处理字符串的最后一个字符，如果是中文的第一个字节 表示有截断 */
 static void gmw_inner_set_half_chinesechar(char* dest, const char* src, int restrict_len);
 /* 根据给定的坐标x, y，绘制色块 */
 static void gmw_inner_draw_block_at_position(const CONSOLE_GRAPHICS_INFO* const pCGI, const int x, const int y, const BLOCK_DISPLAY_INFO* pbdi, bool has_border, bool need_delay);
-/*将鼠标的XY坐标转换为游戏区域的行列号*/
+/* 将鼠标的XY坐标转换为游戏区域的行列号 */
 static int gmw_inner_convert_xy_to_rc(const CONSOLE_GRAPHICS_INFO* const pCGI, int MX, int MY, int& MRow, int& MCol);
+/* 绘制移动的色块 */
+static int gmw_inner_move_block(const CONSOLE_GRAPHICS_INFO* const pCGI, const int BX, const int BY, const int bdi_value_catchy, const BLOCK_DISPLAY_INFO* const bdi);
+
 /* ----------------------------------------------- 
 		实现下面给出的函数（函数声明不准动）
    ----------------------------------------------- */
@@ -269,6 +274,7 @@ int gmw_set_frame_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 		char v_right_separator[CFI_LEN];	// "╢"
 		char mid_separator[CFI_LEN];		// "┼"
 	*/
+	
 	switch (type) {
 		case 1: // 全双线
 			strcpy(pCGI->CFI.top_left, "╔");
@@ -297,7 +303,7 @@ int gmw_set_frame_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 			strcpy(pCGI->CFI.mid_separator, "┼");
 			break;
 		case 3: // 横双竖单
-			strcpy(pCGI->CFI.top_left, "╒");
+			strcpy(pCGI->CFI.top_left, "╒"); 
 			strcpy(pCGI->CFI.lower_left, "╘");
 			strcpy(pCGI->CFI.top_right, "╕");
 			strcpy(pCGI->CFI.lower_right, "╛");
@@ -325,7 +331,11 @@ int gmw_set_frame_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 		default:
 			return -1;
 	}
-	return 0; //此句可根据需要修改
+
+	if (type == 1 || type == 2 || type == 3 || type == 4)
+		return 1; //此句可根据需要修改
+	else
+		return 0;
 }
 
 /***************************************************************************
@@ -346,16 +356,24 @@ static void gmw_inner_set_frame_linetyper(char* dest, const char* src)
 		strcpy(dest, "  ");
 	}
 	else {
-		// 如果是1字节字符，补空格
-		if (strlen(src) == 1) {
+		int src_len = strlen(src);
+
+		// 如果是1字节字符，补一个空格
+		if (src_len == 1) {
 			dest[0] = src[0];
 			dest[1] = ' ';
+			dest[2] = '\0';
+		}
+		// 如果恰好是2字节，直接复制
+		else if (src_len == 2) {
+			dest[0] = src[0];
+			dest[1] = src[1];
 			dest[2] = '\0';
 		}
 		// 如果超过2字节，截取前2字节
 		else {
 			strncpy(dest, src, 2);
-			dest[2] = '\0';  // 确保字符串以 NULL 结尾
+			dest[2] = '\0';
 		}
 	}
 }
@@ -379,7 +397,7 @@ int gmw_set_frame_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const char *top_le
 	gmw_inner_set_frame_linetyper(pCGI->CFI.v_right_separator, v_right_separator);
 	gmw_inner_set_frame_linetyper(pCGI->CFI.mid_separator, mid_separator);
 
-	return 0; //此句可根据需要修改
+	return 1; //此句可根据需要修改
 }
 
 /***************************************************************************
@@ -773,114 +791,192 @@ int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, co
   返 回 值：
   说    明：具体可参考demo的效果
 ***************************************************************************/
-int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
+static void gmw_inner_simple_showstr(const char* str, int rpt, int maxlen)
+{
+	const char* p;
+	int i, rpt_count = 0;
+
+	/* 首先考虑str==NULL / str="" 的情况
+	   1、如果maxlen是-1/0，则直接返回，什么都不打印
+	   2、如果maxlen>0，则用maxlen个空格填充 */
+	if (str == NULL || str[0] == 0) {
+		for (i = 0; i < maxlen; i++) //如果maxlen是-1、0，循环不执行，直接返回
+			putchar(' ');
+		return;
+	}
+
+	/* 之行到此，是str非NULL/str!=""的情况(既strlen一定>0) */
+	if (rpt <= 0)
+		rpt = 1; //防止错误参数
+
+	if (maxlen < 0)
+		maxlen = strlen(str) * rpt; //未给出maxlen则为原始长度
+
+	/*	双线框架："╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬"
+		单线框架："┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋"
+		横双竖单: "╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪"
+		横单竖双："╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"
+		*/
+	const char* special[] = { "╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬",
+							"┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋",
+							"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪",
+							"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫",
+							"┌",  "┬", "└", "┐", "┘", "┴", "├", "┤", "┼", "─", "│",
+
+							NULL
+	};
+	/* 没有用效率最高的方法，用了比较容易读懂的方法 */
+	for (i = 0, p = str; i < maxlen; i++, p++) {	//重复rpt次，每次输出字符串，适用于在画边框时输出若干个"═"等情况
+		if (*p == 0) {
+			p = str; //如果p已经到\0，则回到头（此处已保证strlen(str)>0，即一定有内容）
+			rpt_count++;
+		}
+
+		if (rpt_count >= rpt) { //如果超过了rpt次数则用空格填充
+			putchar(' ');
+			continue;
+		}
+
+		/* 如果未到字符串尾部且不是最后一个字符，则判断是否边框线 */
+		if ((*p != '\0') && (*(p + 1) != '\0')) {
+			bool found = false;
+			int sp_no;
+			for (sp_no = 0; special[sp_no] != NULL; sp_no++)
+				if (strncmp(p, special[sp_no], strlen(special[sp_no])) == 0) {
+					found = true;
+					break;
+				}
+
+			/* 判断是否边框 */
+			if (found) {
+				/* 是边框线 */
+				putchar(*p);
+				++i; //多加一次
+				++p; //多加一次
+				putchar(*p);
+				putchar(' '); //多补一个空格
+			}
+			else { //不是边框
+				putchar(*p);
+			}
+		}//end of if
+		else if ((*p != '\0') && (*(p + 1) == '\0')) {
+			/* 如果是最后一个字符 */
+			putchar(*p);
+		}
+	}//end of for
+}
+
+int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO* const pCGI)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
 
-	/* 基本flag */
-	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
-	cct_cls();
+	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high);
 	cct_setconsoleborder(pCGI->cols, pCGI->lines);
-	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);
+	cct_setcolor((*pCGI).area_bgcolor, (*pCGI).area_fgcolor);
+	cct_cls();
 
-	/* 列标 */
+	//列标
 	if (pCGI->draw_frame_with_col_no) {
-		cct_gotoxy(pCGI->start_x + 1 + pCGI->CFI.block_width / 2, pCGI->start_y - 1);
-		for (int i = 0; i < pCGI->col_num; i++) {
-			if (i < 100)
-				cout << setw(2 * pCGI->CFI.separator + pCGI->CFI.block_width) << i << resetiosflags(ios::left);
+		cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2 + pCGI->CFI.block_width / 2 + 1, pCGI->extern_up_lines + pCGI->SLI.is_top_status_line);
+		for (int j = 0; j < pCGI->col_num; j++)
+			if (j >= 100)
+				cout << setw(pCGI->CFI.block_width + 2 * pCGI->CFI.separator) << setiosflags(ios::left) << '*';
 			else
-				cout << setw(2 * pCGI->CFI.separator + pCGI->CFI.block_width) << "**" << resetiosflags(ios::left);
-			Sleep(pCGI->delay_of_draw_frame); 
-		}
+				cout << setw(pCGI->CFI.block_width + 2 * pCGI->CFI.separator) << setiosflags(ios::left) << j;
 	}
 
-	/* 行号 */
-	if (pCGI->draw_frame_with_row_no) {
-		for (int i = 0; i < pCGI->row_num; i++) {
-			cct_gotoxy(pCGI->extern_left_cols, pCGI->start_y + pCGI->CFI.separator + pCGI->CFI.block_high / 2 +
-				i * (1 * pCGI->CFI.separator + pCGI->CFI.block_high));
-			if (i < 26)
-				cout << char(i + 'A') << ' ';
-			else if (i < 52)
-				cout << char(i - 26 + 'a') << ' ';
-			else
-				cout << '*' << ' ';
+	//首行
+	cct_setcolor((*pCGI).CFI.bgcolor, (*pCGI).CFI.fgcolor);
+	cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, pCGI->extern_up_lines + pCGI->draw_frame_with_col_no + pCGI->SLI.is_top_status_line);
+	//cout << pCGI->CFI.top_left;
+	gmw_inner_simple_showstr(pCGI->CFI.top_left, 1, strlen(pCGI->CFI.top_left));  // 输出左上角字符
+	for (int j = 0; j < pCGI->col_num; j++) {
+		for (int c = 0; c < pCGI->CFI.block_width; c += 2)
+			//cout << pCGI->CFI.h_normal;
+			gmw_inner_simple_showstr(pCGI->CFI.h_normal, 1, strlen(pCGI->CFI.h_normal));  // 输出横线
+		if (pCGI->CFI.separator)
+			//cout << pCGI->CFI.h_top_separator;
+			gmw_inner_simple_showstr(pCGI->CFI.h_top_separator, 1, strlen(pCGI->CFI.h_top_separator));    // 输出分隔符
+		Sleep(pCGI->delay_of_draw_frame);
+	}
+	if (pCGI->CFI.separator)
+		//	cout << "\b\b";
+		//cout << pCGI->CFI.top_right << endl;
+		gmw_inner_simple_showstr("\b\b", 1, 2);
+	gmw_inner_simple_showstr(pCGI->CFI.top_right, 1, strlen(pCGI->CFI.top_right));  // 输出右上角字符
+	Sleep(pCGI->delay_of_draw_frame);
+
+
+	//中间行
+	for (int i = 0; i < pCGI->row_num; i++) {
+		for (int r = 0; r < pCGI->CFI.block_high; r++) {
+			//行标
+			cct_setcolor((*pCGI).area_bgcolor, (*pCGI).area_fgcolor);
+			cct_gotoxy(pCGI->extern_left_cols, r + 1 + (i * (pCGI->CFI.separator + pCGI->CFI.block_high)) + pCGI->SLI.is_top_status_line + pCGI->extern_up_lines + pCGI->draw_frame_with_col_no);
+			if (pCGI->draw_frame_with_row_no && r == (pCGI->CFI.block_high - 1) / 2)
+				if (i < 52)
+					cout << (i >= 26 ? (char)('a' + i - 26) : (char)('A' + i));
+				else
+					cout << '*';
+			cct_setcolor((*pCGI).CFI.bgcolor, (*pCGI).CFI.fgcolor);
+			Sleep(pCGI->delay_of_draw_frame);
+
+			//|   |
+			cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, r + 1 + (i * (pCGI->CFI.separator + pCGI->CFI.block_high)) + pCGI->SLI.is_top_status_line + pCGI->extern_up_lines + pCGI->draw_frame_with_col_no);
+			//cout << pCGI->CFI.v_normal;
+			gmw_inner_simple_showstr(pCGI->CFI.v_normal, 1, strlen(pCGI->CFI.v_normal));  // 输出左边框
+			for (int j = 0; j < pCGI->col_num; j++) {
+				for (int c = 0; c < pCGI->CFI.block_width; c += 2)
+					cout << "  ";
+				if (pCGI->CFI.separator)
+					//cout << pCGI->CFI.v_normal;
+					gmw_inner_simple_showstr(pCGI->CFI.v_normal, 1, strlen(pCGI->CFI.v_normal));  // 输出分隔符
+				Sleep(pCGI->delay_of_draw_frame);
+			}
+			if (!pCGI->CFI.separator)
+				//cout << pCGI->CFI.v_normal;
+				gmw_inner_simple_showstr(pCGI->CFI.v_normal, 1, strlen(pCGI->CFI.v_normal));  // 输出右边框
+			Sleep(pCGI->delay_of_draw_frame);
+		}
+
+		//+------+
+		if (pCGI->CFI.separator) {
+			cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, pCGI->SLI.is_top_status_line + pCGI->extern_up_lines + pCGI->draw_frame_with_col_no + 1 + (i + 1) * pCGI->CFI.block_high + i * pCGI->CFI.separator);
+			//cout << pCGI->CFI.v_left_separator;
+			gmw_inner_simple_showstr(pCGI->CFI.v_left_separator, 1, strlen(pCGI->CFI.v_left_separator));  // 输出左分隔符
+			for (int j = 0; j < pCGI->col_num; j++) {
+				for (int c = 0; c < pCGI->CFI.block_width; c += 2)
+					//	cout << pCGI->CFI.h_normal;
+					//cout << pCGI->CFI.mid_separator;
+					gmw_inner_simple_showstr(pCGI->CFI.h_normal, 1, strlen(pCGI->CFI.h_normal));  // 输出水平线
+				gmw_inner_simple_showstr(pCGI->CFI.mid_separator, 1, strlen(pCGI->CFI.mid_separator));  // 输出中间分隔符
+				Sleep(pCGI->delay_of_draw_frame);
+			}
+			//cout << "\b\b" << pCGI->CFI.v_right_separator;
+			gmw_inner_simple_showstr("\b\b", 1, 2);  // 回退光标两格
+			gmw_inner_simple_showstr(pCGI->CFI.v_right_separator, 1, strlen(pCGI->CFI.v_right_separator));   // 输出右分隔符
 			Sleep(pCGI->delay_of_draw_frame);
 		}
 	}
-
-	/* 主框架 */
-	cct_setcolor(pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
-	if (pCGI->CFI.separator) {  // 有分隔线
-		for (int i = 0; i < pCGI->CFI.bhigh; i++) {
-			cct_gotoxy(pCGI->start_x, pCGI->start_y + i);
-			for (int j = 0; j < pCGI->CFI.bwidth / 2; j++) {
-				if (i == 0) { //首行
-					if (j == 0)
-						cout << pCGI->CFI.top_left;
-					else if (j == pCGI->CFI.bwidth / 2 - 1)
-						cout << pCGI->CFI.top_right; 
-					else if (j % (pCGI->CFI.block_width / 2 + 1) == 0)
-						cout << pCGI->CFI.h_top_separator; 
-					else
-						cout << pCGI->CFI.h_normal;
-				}
-				else if (i == pCGI->CFI.bhigh - 1) {  // 尾行
-					if (j == 0)
-						cout << pCGI->CFI.lower_left; 
-					else if (j == pCGI->CFI.bwidth / 2 - 1)
-						cout << pCGI->CFI.lower_right;
-					else if (j % (pCGI->CFI.block_width / 2 + 1) == 0)
-						cout << pCGI->CFI.h_lower_separator; 
-					else
-						cout << pCGI->CFI.h_normal; 
-				}
-				else if (i % (pCGI->CFI.block_high + 1) == 0) {  // 中间分隔线
-					if (j == 0)
-						cout << pCGI->CFI.v_left_separator;
-					else if (j == pCGI->CFI.bwidth / 2 - 1)
-						cout << pCGI->CFI.v_right_separator;
-					else if (j % (pCGI->CFI.block_width / 2 + 1) == 0)
-						cout << pCGI->CFI.mid_separator;
-					else
-						cout << pCGI->CFI.h_normal;
-				}
-				else {  // 普通色块行
-					if (j % (pCGI->CFI.block_width / 2 + 1) == 0)
-						cout << pCGI->CFI.v_normal; 
-					else
-						cout << "  ";
-				}
-				Sleep(pCGI->delay_of_draw_frame); 
-			}
-		}
+	//尾行
+	cct_gotoxy(pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2, pCGI->extern_up_lines + pCGI->draw_frame_with_col_no + pCGI->SLI.is_top_status_line + pCGI->CFI.bhigh - 1);
+	//cout << pCGI->CFI.lower_left;
+	gmw_inner_simple_showstr(pCGI->CFI.lower_left, 1, strlen(pCGI->CFI.lower_left));  // 输出左下角字符
+	for (int j = 0; j < pCGI->col_num; j++) {
+		for (int c = 0; c < pCGI->CFI.block_width; c += 2)
+			gmw_inner_simple_showstr(pCGI->CFI.h_normal, 1, strlen(pCGI->CFI.h_normal));  // 输出横线
+		if (pCGI->CFI.separator)
+			gmw_inner_simple_showstr(pCGI->CFI.h_lower_separator, 1, strlen(pCGI->CFI.h_lower_separator));  // 输出底部分隔符
 	}
-	else {  // 无分隔线
-		for (int i = 0; i < pCGI->CFI.bhigh; i++) {
-			cct_gotoxy(pCGI->start_x, pCGI->start_y + i);
-			for (int j = 0; j < pCGI->CFI.bwidth / 2; j++) {
-				if (i == 0 && j == 0)
-					cout << pCGI->CFI.top_left;
-				else if (i == pCGI->CFI.bhigh - 1 && j == 0)
-					cout << pCGI->CFI.lower_left;
-				else if (i == 0 && j == pCGI->CFI.bwidth / 2 - 1)
-					cout << pCGI->CFI.top_right; 
-				else if (i == pCGI->CFI.bhigh - 1 && j == pCGI->CFI.bwidth / 2 - 1)
-					cout << pCGI->CFI.lower_right;
-				else if (i == 0 || i == pCGI->CFI.bhigh - 1)
-					cout << pCGI->CFI.h_normal; 
-				else if (j == 0 || j == pCGI->CFI.bwidth / 2 - 1)
-					cout << pCGI->CFI.v_normal; 
-				else
-					cout << "  "; 
-				Sleep(pCGI->delay_of_draw_frame);
-			}
-		}
-	}  
-
+	if (pCGI->CFI.separator)
+		//cout << "\b\b";
+		gmw_inner_simple_showstr("\b\b", 1, 2);
+	//cout << pCGI->CFI.lower_right << endl;
+	gmw_inner_simple_showstr(pCGI->CFI.lower_right, 1, strlen(pCGI->CFI.lower_right));  // 输出右下角字符
+	Sleep(pCGI->delay_of_draw_frame);
 	return 0; //此句可根据需要修改
 }
 
@@ -896,27 +992,29 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
             2、如果最后一个字符是某汉字的前半个，会导致后面乱码，要处理
 ***************************************************************************/
 static void gmw_inner_set_half_chinesechar(char* dest, const char* src, int restrict_len)
-{
+{  // flag
 	// NULL
 	if (src == NULL) {
 		strcpy(dest, "");
+		return;
 	}
-	else {
-		strncpy(dest, src, restrict_len);
-		dest[restrict_len] = '\0'; 
-		// 如果最后一个字符是某汉字的前半个，会导致后面乱码，要处理
-		int len = strlen(dest);
-		if (len > 0 && (unsigned char)dest[len - 1] > 127) {
-			// 查找最后一个有效字符的起点（从倒数第二个字符开始检查）
-			for (int i = len - 1; i >= 0; i--) {
-				if ((unsigned char)dest[i] <= 127) {// 找到一个非中文字符，说明没有截断
-					return;
-				}
-				else if ((unsigned char)dest[i] > 127 && (i % 2 == 0)) {
-					dest[i] = '\0';
-					return;
-				}
-			}
+
+	// 拷贝并截断
+	strncpy(dest, src, restrict_len);
+	dest[restrict_len] = '\0'; // 确保字符串结尾
+
+	// 判断最后一个字符是否为中文的第一个字节
+	char* last = dest + strlen(dest) - 1; // 指向最后一个字符
+	if ((unsigned char)*last > 127) { // 如果是汉字
+		char* ps = dest;
+		while (ps < last) {
+			if ((unsigned char)*ps > 127)
+				ps += 2; 
+			else
+				ps += 1;
+		}
+		if (ps > last + 1) {
+			*last = '\0';
 		}
 	}
 }
@@ -988,8 +1086,18 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 ***************************************************************************/
 static void gmw_inner_draw_block_at_position(const CONSOLE_GRAPHICS_INFO* const pCGI, const int x, const int y, const BLOCK_DISPLAY_INFO* pbdi, bool has_border, bool need_delay)
 {
-	int block_bg_color = (pbdi->bgcolor == -1) ? pCGI->CFI.bgcolor : pbdi->bgcolor;
-	int block_fg_color = (pbdi->fgcolor == -1) ? pCGI->CFI.fgcolor : pbdi->fgcolor;
+	int block_fg_color;
+	int block_bg_color;
+
+	if (pbdi->value == BDI_VALUE_BLANK) {
+		block_bg_color = (pbdi->bgcolor == -1) ? pCGI->CFI.bgcolor : pbdi->bgcolor;
+		block_fg_color = block_bg_color;
+	}
+	else {
+		block_bg_color = (pbdi->bgcolor == -1) ? pCGI->CFI.bgcolor : pbdi->bgcolor;
+		block_fg_color = (pbdi->fgcolor == -1) ? pCGI->CFI.fgcolor : pbdi->fgcolor;
+	}
+
 	cct_setcolor(block_bg_color, block_fg_color);
 
 	for (int i = 0; i < pCGI->CFI.block_high; i++) {
@@ -999,23 +1107,23 @@ static void gmw_inner_draw_block_at_position(const CONSOLE_GRAPHICS_INFO* const 
 			if (has_border) {
 				if (i == 0) {
 					if (j == 0)
-						cout << pCGI->CBI.top_left;
+						gmw_inner_simple_showstr(pCGI->CBI.top_left, 1, strlen(pCGI->CBI.top_left));  // 左上角
 					else if (j == pCGI->CFI.block_width / 2 - 1)
-						cout << pCGI->CBI.top_right;
+						gmw_inner_simple_showstr(pCGI->CBI.top_right, 1, strlen(pCGI->CBI.top_right));  // 右上角
 					else
-						cout << pCGI->CBI.h_normal;
+						gmw_inner_simple_showstr(pCGI->CBI.h_normal, 1, strlen(pCGI->CBI.h_normal));  // 水平边框
 				}
 				else if (i == pCGI->CFI.block_high - 1) {
 					if (j == 0)
-						cout << pCGI->CBI.lower_left;
+						gmw_inner_simple_showstr(pCGI->CBI.lower_left, 1, strlen(pCGI->CBI.lower_left));  // 左下角
 					else if (j == pCGI->CFI.block_width / 2 - 1)
-						cout << pCGI->CBI.lower_right;
+						gmw_inner_simple_showstr(pCGI->CBI.lower_right, 1, strlen(pCGI->CBI.lower_right));  // 右下角
 					else
-						cout << pCGI->CBI.h_normal;
+						gmw_inner_simple_showstr(pCGI->CBI.h_normal, 1, strlen(pCGI->CBI.h_normal));  // 水平边框
 				}
 				else {
 					if (j == 0 || j == pCGI->CFI.block_width / 2 - 1)
-						cout << pCGI->CBI.v_normal;
+						gmw_inner_simple_showstr(pCGI->CBI.v_normal, 1, strlen(pCGI->CBI.v_normal));  // 左右边框
 					else
 						cout << "  ";
 				}
@@ -1052,8 +1160,10 @@ int gmw_draw_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, co
 		pbdi++;
 
 	// 起始坐标
-	int block_start_x = pCGI->start_x + 2 + col_no * (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-	int block_start_y = pCGI->start_y + 1 + row_no * (pCGI->CFI.block_high + pCGI->CFI.separator);
+	int block_start_x = pCGI->start_x + pCGI->draw_frame_with_row_no * 2 + 2 + col_no * (pCGI->CFI.block_width + pCGI->CFI.separator * 2);
+	int block_start_y = pCGI->start_y + pCGI->draw_frame_with_col_no + 1 + row_no * (pCGI->CFI.block_high + pCGI->CFI.separator);
+	//int block_start_x = pCGI->start_x + 2 + col_no * (pCGI->CFI.block_width + 2 * pCGI->CFI.separator); // 2
+	//int block_start_y = pCGI->start_y + 1 + row_no * (pCGI->CFI.block_high + pCGI->CFI.separator); // 1
 
 	// 调用新的绘制函数，has_border 参数取决于 pCGI->CBI.block_border
 	gmw_inner_draw_block_at_position(pCGI, block_start_x, block_start_y, pbdi, pCGI->CBI.block_border, true);
@@ -1075,86 +1185,176 @@ int gmw_draw_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, co
   返 回 值：
   说    明：
 ***************************************************************************/
-int gmw_move_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, const int col_no, const int bdi_value, const int blank_bdi_value, const BLOCK_DISPLAY_INFO *const bdi, const int direction, const int distance)
+static int gmw_inner_move_block(const CONSOLE_GRAPHICS_INFO* const pCGI, const int BX, const int BY, const int bdi_value_catchy, const BLOCK_DISPLAY_INFO* const bdi)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
 
-	/* 初始化 块左上角 */
-	int block_start_x = pCGI->start_x + 2 + col_no * (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-	int block_start_y = pCGI->start_y + 1 + row_no * (pCGI->CFI.block_high + pCGI->CFI.separator);
+	/* 查找匹配的色块 */
+	for (int i = 0; (bdi + i)->value != BDI_VALUE_END; i++){
+		if (bdi_value_catchy == (bdi + i)->value) {
+			// 获取起始位置 + 颜色
+			int x = BX;
+			int y = BY;
+			int bgcolor, fgcolor;
+			bgcolor = (bdi + i)->bgcolor < 0 ? pCGI->CFI.bgcolor : (bdi + i)->bgcolor;
+			fgcolor = (bdi + i)->fgcolor < 0 ? pCGI->CFI.fgcolor : (bdi + i)->fgcolor;
 
-	/* 终点坐标 */
-	int block_end_x = block_start_x;
-	int block_end_y = block_start_y;
-
-	/* 判断移动方向 落点位置 */
-	switch (direction) {
-		case UP_TO_DOWN:
-			block_end_y = block_start_y + distance * (pCGI->CFI.block_high + pCGI->CFI.separator);
-			break;
-		case DOWN_TO_UP:
-			block_end_y = block_start_y - distance * (pCGI->CFI.block_high + pCGI->CFI.separator);
-			break;
-		case LEFT_TO_RIGHT:
-			block_end_x = block_start_x + distance * (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-			break;
-		case RIGHT_TO_LEFT:
-			block_end_x = block_start_x - distance * (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-			break;
+			if (pCGI->CBI.block_border == false) {  //无边框
+				for (int row = 0; row < pCGI->CFI.block_high; row++) {
+					for (int col = 0; col < pCGI->CFI.block_width / 2; col++) {
+						if (row == pCGI->CFI.block_high / 2 && col == pCGI->CFI.block_width / 4) {
+							if ((bdi + i)->content == NULL) {
+								cct_showint(x + col * 2, y + row, (bdi + i)->value, bgcolor, fgcolor);
+								if ((bdi + i)->value < 10)
+									cct_showch(x + col * 2 + 1, y + row, ' ', bgcolor, fgcolor);
+							}
+							else
+								cct_showstr(x + col * 2, y + row, (bdi + i)->content, bgcolor, fgcolor);
+						}
+						else
+							cct_showstr(x + col * 2, y + row, "  ", bgcolor, fgcolor);
+					}
+				}
+			}
+			else {  //有边框
+				for (int row = 0; row < pCGI->CFI.block_high; row++) {
+					for (int col = 0; col < pCGI->CFI.block_width / 2; col++) {
+						if (row == pCGI->CFI.block_high / 2 && col == pCGI->CFI.block_width / 4) {
+							if ((bdi + i)->content == NULL) {
+								cct_showint(x + col * 2, y + row, (bdi + i)->value, bgcolor, fgcolor);
+								if ((bdi + i)->value < 10)
+									cct_showch(x + col * 2 + 1, y + row, ' ', bgcolor, fgcolor);
+							}
+							else
+								cct_showstr(x + col * 2, y + row, (bdi + i)->content, bgcolor, fgcolor);
+						}
+                        // 处理空白值的特殊情况
+                        else if ((bdi + i)->value == BDI_VALUE_BLANK) {
+                            cct_showstr(x + col * 2, y + row, "  ", bgcolor, fgcolor);
+                        } 
+                        // 绘制顶部边框
+                        else if (row == 0) {
+                            if (col == 0)
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.top_left, bgcolor, fgcolor);
+                            else if (col == pCGI->CFI.block_width / 2 - 1)
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.top_right, bgcolor, fgcolor);
+                            else
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.h_normal, bgcolor, fgcolor);
+                        } 
+                        // 绘制底部边框
+                        else if (row == pCGI->CFI.block_high - 1) {
+                            if (col == 0)
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.lower_left, bgcolor, fgcolor);
+                            else if (col == pCGI->CFI.block_width / 2 - 1)
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.lower_right, bgcolor, fgcolor);
+                            else
+                                cct_showstr(x + col * 2, y + row, pCGI->CBI.h_normal, bgcolor, fgcolor);
+                        } 
+						// 绘制左右边框
+						else if (col == 0 || col == pCGI->CFI.block_width / 2 - 1)
+							cct_showstr(x + col * 2, y + row, pCGI->CBI.v_normal, bgcolor, fgcolor);
+						// 填充其余区域为空白
+						else
+							cct_showstr(x + col * 2, y + row, "  ", bgcolor, fgcolor);
+					}
+				}
+			}
+			return 0;
+		}
 	}
 
-	/* move */
-	if (pCGI->CFI.separator) { // 有分隔
-		for (int step = 0; step < distance; step++) {
-			/* 空白 */
-			gmw_inner_draw_block_at_position(pCGI, block_start_x, block_start_y, &bdi[bdi_value], pCGI->CBI.block_border, false);
-			Sleep(pCGI->delay_of_block_moved);
+	return -1; //此句可根据需要修改
+}
 
-			switch (direction) {
-				case UP_TO_DOWN:
-					block_start_y += (pCGI->CFI.block_high + pCGI->CFI.separator);
-					break;
-				case DOWN_TO_UP:
-					block_start_y -= (pCGI->CFI.block_high + pCGI->CFI.separator);
-					break;
-				case LEFT_TO_RIGHT:
-					block_start_x += (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-					break;
-				case RIGHT_TO_LEFT:
-					block_start_x -= (pCGI->CFI.block_width + 2 * pCGI->CFI.separator);
-					break;
+int gmw_move_block(const CONSOLE_GRAPHICS_INFO* const pCGI, const int row_no, const int col_no, const int bdi_value_catchy, const int blank_bdi_value_catchy, const BLOCK_DISPLAY_INFO* const bdi, const int direction, const int distance)
+{
+	/* 确保在初始化后才能调用其他函数 */
+	if (pCGI->inited != CGI_INITED)
+	return -1;
+
+	// 计算起始色块的左上角位置
+	int x = pCGI->start_x + pCGI->draw_frame_with_row_no * 2 + 2 + col_no * (pCGI->CFI.block_width + pCGI->CFI.separator * 2);
+	int y = pCGI->start_y + pCGI->draw_frame_with_col_no + 1 + row_no * (pCGI->CFI.block_high + pCGI->CFI.separator);
+
+	// 获取背景和前景颜色
+	int bgcolor = bdi->bgcolor < 0 ? pCGI->CFI.bgcolor : bdi->bgcolor;
+	int fgcolor = bdi->fgcolor < 0 ? pCGI->CFI.fgcolor : bdi->fgcolor;
+
+	// 处理不同方向的移动
+	int total_steps = distance * (pCGI->CFI.block_width / 2 + pCGI->CFI.separator);
+
+	// 根据不同的方向进行处理
+	if (direction == UP_TO_DOWN) {
+		// 从上到下移动
+		for (int i = 0; i < total_steps; i++) {
+			if ((i + 1) % (pCGI->CFI.block_width / 2 + pCGI->CFI.separator) == 0 && pCGI->CFI.separator) {
+				for (int j = 0; j < pCGI->CFI.block_width / 2; j++)
+					cct_showstr(x + j * 2, y, pCGI->CFI.h_normal, pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
 			}
+			else { 
+				for (int j = 0; j < pCGI->CFI.block_width / 2; j++)
+					cct_showstr(x + j * 2, y, "  ", bgcolor, fgcolor);
+			}
+			y += 1; // 更新y坐标（向下移动）
+			gmw_inner_move_block(pCGI, x, y, bdi_value_catchy, bdi);
+			Sleep(pCGI->delay_of_block_moved); // 延时
+		}
+	}
 
-			gmw_inner_draw_block_at_position(pCGI, block_start_x, block_start_y, &bdi[bdi_value], pCGI->CBI.block_border, false);
+	else if (direction == DOWN_TO_UP) {
+		// 从下到上移动
+		for (int i = 0; i < total_steps; i++) {
+			if ((i + 1) % (pCGI->CFI.block_width / 2 + pCGI->CFI.separator) == 0 && pCGI->CFI.separator) {
+				for (int j = 0; j < pCGI->CFI.block_width / 2; j++)
+					cct_showstr(x + j * 2, y + pCGI->CFI.block_high - 1, pCGI->CFI.h_normal, pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
+			}
+			else {
+				for (int j = 0; j < pCGI->CFI.block_width / 2; j++)
+					cct_showstr(x + j * 2, y + pCGI->CFI.block_high - 1, "  ", bgcolor, fgcolor);
+			}
+			y -= 1; 
+			gmw_inner_move_block(pCGI, x, y, bdi_value_catchy, bdi);
 			Sleep(pCGI->delay_of_block_moved);
 		}
 	}
-	else { // 无分割
-		for (int step = 0; step < distance; step++) {
-			/* 空白 */
-			gmw_inner_draw_block_at_position(pCGI, block_start_x, block_start_y, &bdi[bdi_value], pCGI->CBI.block_border, false);
-			Sleep(pCGI->delay_of_block_moved);
 
-			switch (direction) {
-				case UP_TO_DOWN:
-					block_start_y += pCGI->CFI.block_high;
-					break;
-				case DOWN_TO_UP:
-					block_start_y -= pCGI->CFI.block_high;
-					break;
-				case LEFT_TO_RIGHT:
-					block_start_x += pCGI->CFI.block_width;
-					break;
-				case RIGHT_TO_LEFT:
-					block_start_x -= pCGI->CFI.block_width;
-					break;
+	else if (direction == LEFT_TO_RIGHT) {
+		// 从左到右移动
+		for (int i = 0; i < total_steps; i++) {
+			if ((i + 1) % (pCGI->CFI.block_width / 2 + pCGI->CFI.separator) == 0 && pCGI->CFI.separator) {
+				for (int j = 0; j < pCGI->CFI.block_high; j++)
+					cct_showstr(x, y + j, pCGI->CFI.v_normal, pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
 			}
-
-			gmw_inner_draw_block_at_position(pCGI, block_start_x, block_start_y, &bdi[bdi_value], pCGI->CBI.block_border, false);
+			else {
+				for (int j = 0; j < pCGI->CFI.block_high; j++)
+					cct_showstr(x, y + j, "  ", bgcolor, fgcolor);
+			}
+			x += 2;
+			gmw_inner_move_block(pCGI, x, y, bdi_value_catchy, bdi);
 			Sleep(pCGI->delay_of_block_moved);
 		}
+	}
+
+	else if (direction == RIGHT_TO_LEFT) {
+		// 从右到左移动
+		for (int i = 0; i < total_steps; i++) {
+			if ((i + 1) % (pCGI->CFI.block_width / 2 + pCGI->CFI.separator) == 0 && pCGI->CFI.separator) {
+				for (int j = 0; j < pCGI->CFI.block_high; j++)
+					cct_showstr(x + pCGI->CFI.block_width - 2, y + j, pCGI->CFI.v_normal, pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
+			}
+			else {
+				for (int j = 0; j < pCGI->CFI.block_high; j++)
+					cct_showstr(x + pCGI->CFI.block_width - 2, y + j, "  ", bgcolor, fgcolor);
+			}
+			x -= 2;
+			gmw_inner_move_block(pCGI, x, y, bdi_value_catchy, bdi);
+			Sleep(pCGI->delay_of_block_moved);
+		}
+	}
+	else {
+		return -1;
 	}
 	return 0; //此句可根据需要修改
 }
@@ -1209,58 +1409,82 @@ static int gmw_inner_convert_xy_to_rc(const CONSOLE_GRAPHICS_INFO* const pCGI, i
 	return -1; 
 }
 
-int gmw_read_keyboard_and_mouse(const CONSOLE_GRAPHICS_INFO *const pCGI, int &MAction, int &MRow, int &MCol, int &KeyCode1, int &KeyCode2, const bool update_lower_status_line)
+int gmw_read_keyboard_and_mouse(const CONSOLE_GRAPHICS_INFO* const pCGI, int& MAction, int& MRow, int& MCol, int& KeyCode1, int& KeyCode2, const bool update_lower_status_line)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-	int MX, MY, prev_MRow, prev_MCol, event;
+
+	cct_enable_mouse();
+
+	int MX = 0, MY = 0;  //记录鼠标位置
+	int type;            //事件类型
+	int MRow_new = MRow, MCol_new = MCol;    //行列新值
+	int sign = 0, old_sign = 0;
 
 	while (1) {
-		prev_MRow = MRow; // 记录当前的行号和列号
-		prev_MCol = MCol;
+		type = cct_read_keyboard_and_mouse(MX, MY, MAction, KeyCode1, KeyCode2);
+		if (type == CCT_KEYBOARD_EVENT)
+			return type;
+		else {
+			//判断右键
+			if (MAction == MOUSE_RIGHT_BUTTON_CLICK) {
+				MRow = MRow_new;
+				MCol = MCol_new;
+				return CCT_MOUSE_EVENT;
+			}
+			old_sign = sign;
+			//判断鼠标位置是否合法
+			sign = 0;
+			if (MX < pCGI->start_x + pCGI->draw_frame_with_row_no * 2 + 2)
+				sign = 1;
+			if (MX >= pCGI->start_x + pCGI->draw_frame_with_row_no * 2 + pCGI->CFI.bwidth - 2)
+				sign = 1;
+			if (MY < pCGI->start_y + pCGI->draw_frame_with_col_no + 1)
+				sign = 1;
+			if (MY >= pCGI->start_y + pCGI->draw_frame_with_col_no + pCGI->CFI.bhigh - 1)
+				sign = 1;
+			if (pCGI->CFI.separator) {
+				if ((MX - pCGI->start_x - pCGI->draw_frame_with_row_no * 2 - 2) % (pCGI->CFI.block_width + 2) >= pCGI->CFI.block_width)
+					sign = 1;
+				if ((MY - pCGI->start_y - pCGI->draw_frame_with_col_no - 1) % (pCGI->CFI.block_high + 1) >= pCGI->CFI.block_high)
+					sign = 1;
+			}
 
-		event = cct_read_keyboard_and_mouse(MX, MY, MAction, KeyCode1, KeyCode2); // 读取键盘和鼠标事件
-
-		// 处理鼠标事件
-		if (event == CCT_MOUSE_EVENT) {
-			// 鼠标移动事件
-			if (MAction == MOUSE_ONLY_MOVED) {
-				int valid = gmw_inner_convert_xy_to_rc(pCGI, MX, MY, MRow, MCol); // 判断鼠标是否在合法区域
-				if (valid == -1) { // 如果位置非法
-					if (update_lower_status_line) gmw_status_line(pCGI, LOWER_STATUS_LINE, "[当前光标] 位置非法");
-				}
-				else if (MRow != prev_MRow || MCol != prev_MCol) { // 如果鼠标位置有变动
-					if (update_lower_status_line) {
-						char status_msg[50];
-						sprintf(status_msg, "[当前光标] %c行%d列", (char)(MRow + 'A'), MCol);
-						gmw_status_line(pCGI, LOWER_STATUS_LINE, status_msg);
+			//判断左键
+			if (MAction == MOUSE_LEFT_BUTTON_CLICK) {
+				if (sign) {
+					if (update_lower_status_line && !old_sign) {
+						gmw_status_line(pCGI, LOWER_STATUS_LINE, "[当前光标] 位置非法");
 					}
-					return CCT_MOUSE_EVENT; // 返回鼠标移动事件
+				}
+				else {
+					return CCT_MOUSE_EVENT;
 				}
 			}
 
-			// 鼠标左键点击事件
-			else if (MAction == MOUSE_LEFT_BUTTON_CLICK) {
-				int valid = gmw_inner_convert_xy_to_rc(pCGI, MX, MY, MRow, MCol);
-				if (valid == -1) { // 非法位置
-					if (update_lower_status_line) gmw_status_line(pCGI, LOWER_STATUS_LINE, "[当前光标] 位置非法");
-				}
-				else { // 合法位置
-					return CCT_MOUSE_EVENT; // 返回鼠标左键事件
+			//剩下鼠标移动
+			if (sign) {
+				if (update_lower_status_line && !old_sign) {
+					gmw_status_line(pCGI, LOWER_STATUS_LINE, "[当前光标] 位置非法");
 				}
 			}
-
-			// 鼠标右键点击事件
-			else if (MAction == MOUSE_RIGHT_BUTTON_CLICK) {
-				return CCT_MOUSE_EVENT; // 右键点击直接返回，无需判断位置
+			else {
+				MCol_new = (MX - pCGI->start_x - pCGI->draw_frame_with_row_no * 2 - 2) / (pCGI->CFI.block_width + pCGI->CFI.separator * 2);
+				MRow_new = (MY - pCGI->start_y - pCGI->draw_frame_with_col_no - 1) / (pCGI->CFI.block_high + pCGI->CFI.separator);
+				if (MRow_new != MRow || MCol_new != MCol || old_sign) {
+					if (update_lower_status_line) {
+						char temp[256];
+						sprintf(temp, "[当前光标] %c行%d列", char('A' + MRow_new), MCol_new);
+						gmw_status_line(pCGI, LOWER_STATUS_LINE, temp);
+					}
+					MRow = MRow_new;
+					MCol = MCol_new;
+					return CCT_MOUSE_EVENT;
+				}
 			}
-		}
-
-		// 处理键盘事件
-		else if (event == CCT_KEYBOARD_EVENT) {
-			return CCT_KEYBOARD_EVENT; // 返回键盘事件
 		}
 	}
-	return 0; //此句可根据需要修改
+
+	return CCT_MOUSE_EVENT; //此句可根据需要修改
 }
