@@ -1545,6 +1545,7 @@ int location_2(int (*s)[11], int r, int c, int grid, int mode)
 							} while (!s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]);
 							break;
 					}
+
 					if (s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1]) {
 						n_star(x, y, s[((y - 3) / (grid + sh)) + 1][(x - 4) / (2 * grid + sw) + 1], 15);
 						cct_gotoxy(0, (3 + grid)* r + (4 - grid));

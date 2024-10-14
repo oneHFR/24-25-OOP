@@ -1444,16 +1444,16 @@ int main(int argc, char** argv)
 	//test_color_linez();
 
 	/* 用 magic_ball 来测试游戏区域 */
-	//test_magic_ball();
+	test_magic_ball();
 
 	/* 用 2048 来测试游戏区域 */
 	//test_2048();
 
 	/* 用 合成十 来测试游戏区域 */
-	test_merge_to_10();
+	//test_merge_to_10();
 
 	/* 用 消灭星星 来测试游戏区域 */
-	//test_popstar();
+	test_popstar();
 
 	cct_setcolor();
 
