@@ -47,17 +47,17 @@ int main()
 
 	while (1) {
 		int s[MAX_ROW][MAX_COL] = { 0 };
-		int maxscore = 0, t = 512;
+		int maxscore = 0, t = 0;
 		cct_setcolor();
 		cct_cls();
 		init(&G2048_CGI, 1);
 		gmw_draw_frame(&G2048_CGI);
 
-		//input_parameter(&G2048_CGI, &t);
-		G2048_CGI.row_num = 5;
-		G2048_CGI.col_num = 4;
-		G2048_CGI.delay_of_block_moved = 0;
-		G2048_CGI.delay_of_block_moved = BLOCK_MOVED_DELAY_MS + 5 * G2048_CGI.delay_of_block_moved;
+		input_parameter(&G2048_CGI, &t);
+		//G2048_CGI.row_num = 5;
+		//G2048_CGI.col_num = 4;
+		//G2048_CGI.delay_of_block_moved = 0;
+		//G2048_CGI.delay_of_block_moved = BLOCK_MOVED_DELAY_MS + 5 * G2048_CGI.delay_of_block_moved;
 		/*用缺省值初始化（窗口背景黑/前景白，点阵16*8，上下左右无额外行列，上下状态栏均有，无行号/列标，框架线型为双线，色块宽度2/高度1/无小边框，颜色略）*/
 		init(&G2048_CGI, 2);
 		gmw_draw_frame(&G2048_CGI);
@@ -67,27 +67,7 @@ int main()
 
 		game(&G2048_CGI, s, bdi, t);
 
-		int x, y;
-		cct_getxy(x, y);
-		while (1) {
-			char keepon[1024] = { 0 };
-			cin.getline(keepon, 1024);
-			for (int i = 0; keepon[i] != 0; i++) {
-				if (keepon[i] <= 'z' && keepon[i] >= 'a') {
-					keepon[i] = keepon[i] - ('a' - 'A');
-				}
-			}
-			if (!strcmp(keepon, "END")) {
-				break;
-			}
-			else {
-				cct_gotoxy(0, y + 1);
-				cout << "输入错误，请重新输入";
-				cct_gotoxy(x, y);
-				cout << setw(50) << " ";
-				cct_gotoxy(x, y);
-			}
-		}
+		To_be_continued("游戏重开", &G2048_CGI);
 
 	}
 

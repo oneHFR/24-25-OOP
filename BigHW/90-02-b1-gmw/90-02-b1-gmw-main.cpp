@@ -8,3 +8,6 @@
 #include "../include/common_functions.h"
 #include "../include/cmd_gmw_tools.h"
 #include "90-02-b1-gmw.h"
+
+using namespace std;
+

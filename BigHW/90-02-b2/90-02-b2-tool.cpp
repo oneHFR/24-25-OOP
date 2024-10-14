@@ -4,6 +4,7 @@
 #include "../include/cmd_console_tools.h"
 #include <iomanip>
 #include <conio.h>
+#include <time.h>
 #include <Windows.h>
 #include "../include/common_menu.h"
 #include "../include/common_functions.h"
@@ -22,6 +23,33 @@ using namespace std;
 请输入动画延时[0-5] 0
 */
 
+void To_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
+{
+	if (bgi->inited == CGI_INITED) { //初始化过
+		int l = strlen(prompt) + strlen("，按回车键继续...   ");
+		cct_setcolor(COLOR_HYELLOW, COLOR_BLACK); //恢复初始颜色
+		//pCGI->SLI.top_start_x = (pCGI->cols - strlen(temp)) / 2;
+		cct_gotoxy(0, bgi->SLI.lower_start_y + 1);//光标设到指定位置
+		cout << setw(bgi->cols - 1) << ' '; //先用空格清空整行
+
+		cct_gotoxy((bgi->cols - l) / 2, bgi->SLI.lower_start_y + 1);//光标设到指定位置
+	}
+	else { //未初始化过
+		cct_setcolor(); //缺省颜色
+		cct_gotoxy(0, 0);//光标设到指定位置
+	}
+
+	if (prompt)
+		cout << prompt << "，按回车键继续...   ";
+	else
+		cout << "按回车键继续...   ";
+
+	while (_getch() != '\r')
+		;
+
+	return;
+}
+
 void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 {
 	int x0 = 3;
@@ -31,11 +59,11 @@ void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 	cout << "游戏2048参数设置：" << endl;
 
 	cct_gotoxy(x0, y0+1);
-	cout << "请输入行数[4-8]";
+	cout << "请输入行数[4-6]";
 	cct_getxy(x, y);
 	while (1) {
 		cin >> pCGI->row_num;
-		if (pCGI->row_num == 13 || !cin.good() || pCGI->row_num < 4 || 8 < pCGI->row_num) {
+		if (pCGI->row_num == 13 || !cin.good() || pCGI->row_num < 4 || 6 < pCGI->row_num) {
 			cin.clear();
 			cin.ignore(1024, '\n');
 			cct_showch(x, y, ' ', pCGI->area_fgcolor, pCGI->area_bgcolor, 20);
@@ -61,7 +89,7 @@ void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 	}
 
 	int min_t;
-	if (pCGI->col_num * pCGI->row_num <= 20)
+	if (pCGI->col_num * pCGI->row_num >= 20)
 		min_t = 512;
 	if (pCGI->col_num * pCGI->row_num >= 25)
 		min_t *= 2;
@@ -106,7 +134,7 @@ void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 
 			#define BLOCK_MOVED_DELAY_MS		15	//色块移动的缺省延时，单位ms（其余两个缺省为0）
 			*/
-			pCGI->delay_of_block_moved = BLOCK_MOVED_DELAY_MS + 5 * pCGI->delay_of_block_moved;
+			pCGI->delay_of_block_moved = BLOCK_MOVED_DELAY_MS / 5 + 5 * pCGI->delay_of_block_moved;
 			break;
 		}
 	}
@@ -208,32 +236,10 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 		gmw_set_frame_style(pCGI, 10, 5, true);					//游戏主区域风格：每个色块宽10高5，有分隔线【数字色块带边框，宽度为10(放最多6位数字)，高度为5(为了保持色块为方形)】
 		gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);	//游戏主区域颜色
 		gmw_set_block_border_switch(pCGI, true);				//小色块带边框
+		gmw_set_ext_rowcol(pCGI, 0, 0, 4, 4);
 	}
-
-
-	//gmw_set_color(&G2048_CGI, COLOR_BLACK, COLOR_WHITE);
-	//gmw_set_delay(&G2048_CGI, 1, 0);
-	//gmw_set_delay(&G2048_CGI, 2, 0);
-	//gmw_set_frame_style(&G2048_CGI, 3, 2, false);
-	//gmw_set_rowcol(&G2048_CGI, r, c);
-	//gmw_set_frame_style(&G2048_CGI, 10, 5, 1);
-	//gmw_set_frame_color(&G2048_CGI, COLOR_WHITE, COLOR_BLACK);
-	//gmw_set_status_line_switch(&G2048_CGI, 0, 1);
-	//gmw_set_status_line_switch(&G2048_CGI, 1, 0);
-	
-	/* 定义色块显示时，内部数组的int值与界面上显示图形的对应关系
-   注：此结构体数组的值在测试用例中定义，随着游戏的不同而不同 
-	typedef struct _block_display_info_ {
-		const int   value;	//要显示的内部数组值
-		const int   bgcolor;	//-1表示用游戏区域背景色
-		const int   fgcolor;	//-1表示用游戏区域前景色
-		const char* content;	//内部数组值对应的图形（如果为NULL，则直接显示内部数组的值）
-	} BLOCK_DISPLAY_INFO;*/
-
-
 }
 
-// 通用的方块移动和合并函数
  void move_and_merge_blocks(CONSOLE_GRAPHICS_INFO* const pCGI, int s[][MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int direction, int* check_change)
 {
 	int distance; // 记录方块可以移动的距离
@@ -344,10 +350,6 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 	}
 }
 
-
-
-
-
 void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int t)
 {
 	int loop = 1;
@@ -355,50 +357,81 @@ void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPL
 	int keycode1, keycode2;
 	int ret;
 	int score = 0;
+	char temp[100] = { 0 };
+	time_t start_time = clock();
+	sprintf(temp, "目标:%d 分数:%d 时间:%d （R:重玩 Q:退出）", t, score, int(clock() - start_time) / CLOCKS_PER_SEC);
+	pCGI->SLI.top_start_y = 0;
+	pCGI->SLI.top_start_x = (pCGI->cols - strlen(temp)) / 2;
+	gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
 
 	while (loop) {
 		int distance = 0;
 		int check_change = 0;
 		cct_disable_mouse();
+
 		ret = gmw_read_keyboard_and_mouse(pCGI, maction, mrow, mcol, keycode1, keycode2);
-		if (keycode1 == 0xe0) {
-			// 根据不同的方向调用通用函数处理
-			switch (keycode2) {
-				case KB_ARROW_UP:
-					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_UP, &check_change);
-					break;
+		switch (keycode1) {
+			case 'q':
+			case 'Q':
+				exit(0);
+			case 'r':
+			case 'R':
+				return ;
+			case 0xE0:
+				// 根据不同的方向调用通用函数处理
+				switch (keycode2) {
+					case KB_ARROW_UP:
+						move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_UP, &check_change);
+						break;
 
-				case KB_ARROW_DOWN:
-					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_DOWN, &check_change);
-					break;
+					case KB_ARROW_DOWN:
+						move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_DOWN, &check_change);
+						break;
 
-				case KB_ARROW_LEFT:
-					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_LEFT, &check_change);
-					break;
+					case KB_ARROW_LEFT:
+						move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_LEFT, &check_change);
+						break;
 
-				case KB_ARROW_RIGHT:
-					move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_RIGHT, &check_change);
-					break;
-			}
+					case KB_ARROW_RIGHT:
+						move_and_merge_blocks(pCGI, s, bdi, KB_ARROW_RIGHT, &check_change);
+						break;
+				}
+
+				//else if (keycode1 == 'Q' || keycode1 == 'q')
+				//	exit(0);
+				//else if (keycode1 == 'R' || keycode1 == 'r')
+				//	return ;
+
+				// 如果有方块移动，生成新的随机方块
+
 		}
-
-		// 如果有方块移动，生成新的随机方块
 		if (check_change) {
+			//pCGI->SLI.top_start_x = (pCGI->CFI.bwidth + (pCGI->extern_right_cols + pCGI->extern_left_cols) * 2 - strlen(temp)) / 8;
+			sprintf(temp, "目标:%d 分数:%d 时间:%d （R:重玩 Q:退出）", t, score, int(clock() - start_time) / CLOCKS_PER_SEC);
+			pCGI->SLI.top_start_x = (pCGI->cols - strlen(temp)) / 2;
+			gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
 			new_one(pCGI, s, bdi);
-		}
-
-		// 更新状态栏显示最大值
-		for (int i = 0; i < pCGI->row_num; i++) {
-			for (int j = 0; j < pCGI->col_num; j++) {
-				score = s[i][j] > score ? s[i][j] : score;
+			// 更新状态栏显示最大值
+			for (int i = 0; i < pCGI->row_num; i++) {
+				for (int j = 0; j < pCGI->col_num; j++) {
+					score = s[i][j] > score ? s[i][j] : score;
+				}
 			}
 		}
-		char temp[30];
-		sprintf(temp, "目前最大值：%d 目标值：%d", score, t);
-		gmw_status_line(pCGI, 0, temp);
 
 		loop = check(pCGI, s);
-
+	}
+	if (!loop) {
+		sprintf(temp, "游戏失败！ 最终分数:%d 时间:%d", score, int(clock() - start_time) / CLOCKS_PER_SEC);
+		// pCGI->SLI.top_start_x = (pCGI->CFI.bwidth + (pCGI->extern_right_cols + pCGI->extern_left_cols) * 2 - strlen(temp)) / 8;
+		pCGI->SLI.top_start_x = (pCGI->cols - strlen(temp)) / 2;
+		gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
+	}
+	else {
+		sprintf(temp, "目标实现！ 最终分数:%d 时间:%d",  score, int(clock() - start_time) / CLOCKS_PER_SEC);
+		pCGI->SLI.top_start_x = (pCGI->cols - strlen(temp)) / 2;
+		// pCGI->SLI.top_start_x = (pCGI->CFI.bwidth + (pCGI->extern_right_cols + pCGI->extern_left_cols) * 2 - strlen(temp)) / 8;
+		gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
 	}
 }
 
@@ -438,29 +471,4 @@ int check(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 
 
 
-static void to_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
-{
-	if (bgi->inited == CGI_INITED) { //初始化过
-		cct_setcolor(bgi->area_bgcolor, bgi->area_fgcolor); //恢复初始颜色
-
-		cct_gotoxy(0, bgi->SLI.lower_start_y + 2);//光标设到指定位置
-		cout << setw(bgi->cols - 1) << ' '; //先用空格清空整行
-
-		cct_gotoxy(0, bgi->SLI.lower_start_y + 2);//光标设到指定位置
-	}
-	else { //未初始化过
-		cct_setcolor(); //缺省颜色
-		cct_gotoxy(0, 0);//光标设到指定位置
-	}
-
-	if (prompt)
-		cout << prompt << "，按回车键继续...   ";
-	else
-		cout << "按回车键继续...   ";
-
-	while (_getch() != '\r')
-		;
-
-	return;
-}
 

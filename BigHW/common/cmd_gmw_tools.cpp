@@ -1037,12 +1037,14 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 	/* 宽度限制 */
 	int restrict_width = 2 * pCGI->draw_frame_with_row_no + pCGI->CFI.bwidth; 
 	/*hh现学现用*/
-	char* normal_msg = new char[restrict_width + 1]();
-	char* catchy_display = new char[restrict_width + 1]();
+	char* normal_msg = new(nothrow) char[restrict_width + 1]();
+	char* catchy_display = new(nothrow) char[restrict_width + 1]();
 
 	if (normal_msg == NULL || catchy_display == NULL) {
-		if (normal_msg) delete[] normal_msg;
-		if (catchy_display) delete[] catchy_display;
+		if (normal_msg) 
+			delete[] normal_msg;
+		if (catchy_display) 
+			delete[] catchy_display;
 		return -1;  // 检查
 	}
 
@@ -1056,7 +1058,7 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 		cout << catchy_display;
 		cct_setcolor(pCGI->SLI.top_normal_bgcolor, pCGI->SLI.top_normal_fgcolor);
 		cout << normal_msg;
-		if (int(strlen(normal_msg) + strlen(catchy_display)) < restrict_width)
+		if (int(strlen(normal_msg) + strlen(catchy_display)) < restrict_width && !pCGI->SLI.top_start_x)
 			cout << setw(restrict_width - strlen(normal_msg) - strlen(catchy_display)) << " ";
 	}
 	else if (type == LOWER_STATUS_LINE) {
@@ -1065,7 +1067,7 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 		cout << catchy_display;
 		cct_setcolor(pCGI->SLI.lower_normal_bgcolor, pCGI->SLI.lower_normal_fgcolor);
 		cout << normal_msg;
-		if (int(strlen(normal_msg) + strlen(catchy_display)) < restrict_width)
+		if (int(strlen(normal_msg) + strlen(catchy_display)) < restrict_width && !pCGI->SLI.top_start_x)
 			cout << setw(restrict_width - strlen(normal_msg) - strlen(catchy_display)) << " ";
 	}
 

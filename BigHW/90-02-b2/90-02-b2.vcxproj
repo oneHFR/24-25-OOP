@@ -131,7 +131,6 @@
     <ClCompile Include="..\common\cmd_gmw_tools.cpp" />
     <ClCompile Include="..\common\common_functions.cpp" />
     <ClCompile Include="..\common\common_menu.cpp" />
-    <ClCompile Include="90-02-b2-base.cpp" />
     <ClCompile Include="90-02-b2-main.cpp" />
     <ClCompile Include="90-02-b2-tool.cpp" />
   </ItemGroup>
