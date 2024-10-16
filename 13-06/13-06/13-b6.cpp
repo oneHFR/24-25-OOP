@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+//#define _CRTDBG_MAP_ALLOC
+//#include <crtdbg.h> 
+
 using namespace std;
 
 class TString {
@@ -18,7 +21,11 @@ public:
 	const char* get_content() const;
 
 	/* 根据需要补充其它的成员函数的定义(体外实现) */
-
+	// C++ 明显调用的表达式前的括号必须具有(指针)函数类型
+	void set(const char* s = NULL);
+	void set(const TString& s);
+	int length() const;
+	TString(const TString& s);
 };
 
 /***************************************************************************
@@ -73,7 +80,58 @@ const char* TString::get_content() const
 }
 
 /* 在此给出其它成员函数的体外实现部分 */
+int TString::length() const
+{
+	return len;
+}
 
+void TString::set(const TString& s)
+{
+	// 通过set函数将字符串赋值给对象的测试
+	delete[] content;
+	if (s.content == NULL || strlen(s.content) == 0) {
+		content = NULL;
+		len = 0;
+	}
+	else {
+		len = strlen(s.content);
+		content = new(nothrow) char[len + 1];
+		if (content == NULL)
+			exit(-1); //申请不到直接结束整个程序（严格来说这种处理不允许）
+		strcpy(content, s.content);
+	}
+}
+
+void TString::set(const char* s)
+{
+	delete[] content;
+	if (s == NULL || strlen(s) == 0) {
+		content = NULL;
+		len = 0;
+	}
+	else {
+		len = strlen(s);
+		content = new(nothrow) char[len + 1];
+		if (content == NULL)
+			exit(-1); //申请不到直接结束整个程序（严格来说这种处理不允许）
+		strcpy(content, s);
+	}
+}
+
+TString::TString(const TString& s)
+{
+	if (s.content == NULL || strlen(s.content) == 0) {
+		content = NULL;
+		len = 0;
+	}
+	else {
+		len = strlen(s.content);
+		content = new(nothrow) char[len + 1];
+		if (content == NULL)
+			exit(-1); //申请不到直接结束整个程序（严格来说这种处理不允许）
+		strcpy(content, s.content);
+	}
+}
 /***************************************************************************
   函数名称：
   功    能：
@@ -83,6 +141,7 @@ const char* TString::get_content() const
 ***************************************************************************/
 int main()
 {
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	if (1) {
 		TString s1;                  //s1为NULL
 		TString s2("teststr2");      //s2为"teststr2"
@@ -160,20 +219,14 @@ int main()
 		TString s1 = "tongji";
 		TString s2;
 		TString s3(s2);
-
 		cout << "通过set函数将一个对象的字符串赋值给另一个对象的测试" << endl;
-
 		cout << "s0应为hello， 实际输出：" << s0.get_content() << endl;
-
 		s0.set(s1);
 		cout << "s0应为tongji，实际输出：" << s0.get_content() << endl;
-
 		s0.set(s2);
 		cout << "s0应为<NULL>，实际输出：" << s0.get_content() << endl;
-
 		s0.set(s3);
 		cout << "s0应为<NULL>，实际输出：" << s0.get_content() << endl;
-
 		cout << endl << "任意键继续..." << endl;
 		getchar();
 	}
@@ -183,15 +236,11 @@ int main()
 		TString s2;
 		char str1[] = "tong\0\0\0\0";
 		const char* str2 = "ji";
-
 		cout << "求长度测试(length()函数)" << endl;
-
 		cout << "s1为hello， 长度应为5，实际：" << s1.length() << endl;
 		cout << "s2为<NULL>，长度应为0，实际：" << s2.length() << endl;
-
 		s2.set(strcat(str1, str2));
 		cout << "s2为tongji，长度应为6，实际：" << s2.length() << endl;
-
 		cout << endl << "任意键继续..." << endl;
 		getchar();
 	}

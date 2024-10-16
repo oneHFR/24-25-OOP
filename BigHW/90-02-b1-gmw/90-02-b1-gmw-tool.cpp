@@ -1,4 +1,5 @@
 /* 2152131 计科 吴洪蕊 */
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include "../include/cmd_console_tools.h"
 #include <iomanip>
@@ -50,7 +51,7 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 	gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);
 	gmw_set_font(pCGI, "新宋体", 16, 8);
 	gmw_set_frame_style(pCGI, 6, 3, true);	//色块带边框，宽度为6，高度为3
-	gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);
+	gmw_set_frame_color(pCGI, COLOR_HWHITE, COLOR_BLACK);
 	gmw_set_block_border_switch(pCGI, true);
 
 	gmw_set_rowcol(pCGI, pCGI->row_num, pCGI->col_num);
@@ -60,6 +61,7 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 
 	fill(pCGI, s);
 }
+
 void fill(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 {
 	srand((unsigned)time(NULL));
@@ -84,7 +86,7 @@ void fill(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 
 int check_2(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic)
 {
-	int pool[MAX_ROW][MAX_COL] = { 0 };
+	int pool[MAX_ROW +1][MAX_COL +1] = { 0 };
 	for (int i = 1; i <= r; i++) {
 		for (int j = 1; j <= c; j++) {
 			pool[i][j] = s[i][j];
@@ -158,26 +160,9 @@ void search(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic, 
 
 }
 
-void score(int r, int c, int (*h)[11], int* num, int* total, int* rest, int mode)
-{
-	for (int i = 1; i <= r; i++) {
-		for (int j = 1; j <= c; j++) {
-			if (h[i][j] == 1)
-				(*num)++;
-		}
-	}
-	*rest -= *num;
-	*num = (*num) * (*num) * 5;
-	if (*rest < 10 && mode == 0) {
-		*total = *num + 180 * (10 - *rest);
-	}
-	else
-		*total += *num;
-}
-
 int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 {
-
+	int grid = 1;
 	while (1) {
 		int loop = 1;
 		int X, Y;
@@ -189,6 +174,8 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 		int num = 0;
 		int sel = 0;
 		int inval = 0;
+		int total = 0;
+		int rest = pCGI->row_num * pCGI->col_num;
 
 		while (loop) {
 			num = 0;
@@ -206,6 +193,7 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 					gmw_draw_block(pCGI, mrow, mcol, s[mrow][mcol], bdi_selected);
 				}
 				else{
+					//int check = 1;
 					sprintf(temp, "选中了 %c行%d列", char('A' + mrow), mcol);
 					gmw_status_line(pCGI, LOWER_STATUS_LINE, temp);
 					loop = 0;
@@ -217,17 +205,15 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 					case 'Q':
 					case 'q':
 						return 0;
+
 					case 'R':
 					case 'r':
 						return 1;
+
 					case 0xE0: 
-						gmw_draw_block(pCGI, old_mrow, old_mcol, s[old_mrow][old_mcol], bdi_normal);
-						for (int i = 0; i < pCGI->row_num; ++i)
-							for (int j = 0; j < pCGI->col_num; ++j)
-								if (h[i][j]) {
-									gmw_draw_block(pCGI, i, j, s[i][j], bdi_normal);
-									h[i][j] = 0; // 还是用in_h?
-								}
+						if (old_mrow >= 0 && old_mcol >= 0)
+							gmw_draw_block(pCGI, old_mrow, old_mcol, s[old_mrow][old_mcol], bdi_normal);
+						gmw_draw_block(pCGI, mrow, mcol, s[mrow][mcol], bdi_selected);
 						sel = 0;
 						switch (keycode2) {
 							case KB_ARROW_UP:
@@ -252,6 +238,7 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 								break;
 						}
 						break;
+
 					case 13:
 						if (check_2(s, pCGI->row_num, pCGI->col_num, h, old_mrow, old_mrow, 1)) {
 							if (!sel) {
@@ -278,26 +265,19 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 
 								sel = 0;
 								score(pCGI->row_num, pCGI->col_num, h, &num, &total, &rest);
-								cct_gotoxy(0, 0);
-								cout << "                                 ";
-								cct_gotoxy(0, 0);
-								//gmw_status_line(pCGI, LOWER_STATUS_LINE, "合成完成");
-								cout << "本次得分：" << num << " 总得分：" << total;
+								sprintf(temp, "本次得分：%d 总得分：%d", num, total);
+								gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
 
-								if (!grid) {
-									gmw_status_line(pCGI, LOWER_STATUS_LINE, "合成完成");
-								}
-
-								// flag
-								while (!grid) {
+								gmw_status_line(pCGI, LOWER_STATUS_LINE, "合成完成，回车继续");
+								while (1) {
 									ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
-
 									if (ret == CCT_MOUSE_EVENT && (maction == MOUSE_LEFT_BUTTON_CLICK || maction == MOUSE_LEFT_BUTTON_DOUBLE_CLICK || maction == MOUSE_LEFTRIGHT_BUTTON_CLICK || maction == FROM_LEFT_2ND_BUTTON_PRESSED))
 										break;
 									else if (ret == CCT_KEYBOARD_EVENT && keycode1 == 13)
 										break;
 								}
 								// 下落
+								
 								// 先逐行
 								remove_0(s, pCGI->row_num, pCGI->col_num, h, 1);
 								falling_down(s, pCGI->row_num, pCGI->col_num, h, 2, grid);
@@ -312,30 +292,29 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 								   const int direction						：移动方向，一共四种，具体见cmd_gmw_tools.h
 								   const int distance						：移动距离（从1开始，人为保证正确性，程序不检查）
 								*/
-								// gmw_move_block(pMagicBall_CGI, 1, 2, mb[1][2], 0, bdi_normal, UP_TO_DOWN, 1);
-								drop(s, r, c, grid, 2);
+								// gmw_move_block(pCGI, 1, 2, mb[1][2], 0, bdi_normal, UP_TO_DOWN, 1);
+								//drop(s, pCGI->row_num, pCGI->col_num, grid, 2);
 								remove_0(s, pCGI->row_num, pCGI->col_num, h, 2);
 								// 检查继续性
-								int helper_3 = check_3(s, r, c, h);
+								int helper_3 = check_3(s, pCGI->row_num, pCGI->col_num, h);
 								if (!helper_3) {
 									num = 0;
 									in_h(h);
-									score(r, c, h, &num, &total, &rest, 0);
-									cct_gotoxy(0, 0);
-									cout << "                                 ";
-									cct_gotoxy(0, 0);
+									score(pCGI->row_num, pCGI->col_num, h, &num, &total, &rest, 0);
 									if (180 * (10 - rest) > 0)
-										cout << "奖励得分：" << 180 * (10 - rest) << " 总得分：" << total;
+										sprintf(temp, "奖励得分：%d 总得分：%d", 180 * (10 - rest), total);
 									else
-										cout << "奖励得分：" << 0 << " 总得分：" << total;
-									//gmw_status_line(pCGI, LOWER_STATUS_LINE, "周围无相同值");
-									cout << "剩余" << rest << "个星星，无可消除项，本关结束！回车继续下一关";
-									while (grid) {
+										sprintf(temp, "奖励得分：0 总得分：%d", total);
+									gmw_status_line(pCGI, LOWER_STATUS_LINE, temp);
+
+									sprintf(temp, "剩余%d个星星，无可消除项，本关结束！回车继续下一关", rest);
+									gmw_status_line(pCGI, LOWER_STATUS_LINE, temp);
+									while (1) {
 										ret = cct_read_keyboard_and_mouse(X, Y, maction, keycode1, keycode2);
 										if (ret == CCT_KEYBOARD_EVENT && keycode1 == 13)
 											break;
 									}
-									return 27;
+									return 0;  // flag
 								}
 
 								gmw_status_line(pCGI, LOWER_STATUS_LINE, "本次合成结束， 按C继续");
@@ -346,8 +325,6 @@ int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 									else if (ret == CCT_KEYBOARD_EVENT && keycode1 == 'c' || keycode1 == 'C')
 										break;
 								}
-								if (!grid)
-									loop = 0;
 							}
 							break;
 						}

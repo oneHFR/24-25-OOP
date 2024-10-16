@@ -28,6 +28,5 @@ int H7(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 	int next = Game(pCGI, s);
 	if (next == 1)
 		H7(pCGI, s);
-	else
-		return 0;
+	return 0;
 }

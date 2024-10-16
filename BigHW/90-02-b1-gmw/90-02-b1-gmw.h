@@ -1,7 +1,7 @@
 /* 2152131 吴洪蕊 计科 */
 #pragma once
 
-#define MAX_ROW 9
+#define MAX_ROW 11
 #define MAX_COL 11
 
 	 /* 定义1-5的数字用何种形式显示在界面上（正常状态） */
