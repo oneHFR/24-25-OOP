@@ -5,7 +5,7 @@
 #include <conio.h>
 #include <Windows.h>
 #include "../include/common_menu.h"
-#include "../include/common_functions.h"
+//#include "../include/common_functions.h"
 #include "../include/cmd_gmw_tools.h"
 #include "90-02-b1-gmw.h"
 
@@ -51,7 +51,7 @@ int main()
 		int x, y;
 		cout << endl;
 		int l = strlen("本小题结束，请输入End继续...");
-		cct_gotoxy((PopStar_CGI.cols - l) / 2, PopStar_CGI.SLI.lower_start_y + 1);//光标设到指定位置
+		cct_gotoxy((PopStar_CGI.cols - l) / 2, PopStar_CGI.SLI.lower_start_y + 2);//光标设到指定位置
 		cout << "本小题结束，请输入End继续...";
 		cct_getxy(x, y);
 		while (1) {
