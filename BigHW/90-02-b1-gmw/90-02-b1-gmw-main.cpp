@@ -34,8 +34,8 @@ int main()
 		cout << "[ÇëÑ¡Ôñ:] ";
 
 		const char* choice = "AaBbCcDdEeFfGgQq";
-		int option = 'g';
-		//int option = menu(choice);
+		//int option = 'g';
+		int option = menu(choice);
 		if (option >= 'a' && option <= 'z')
 			option = int(option - 'a' + 'A');
 		option = option - 'A' + 1;

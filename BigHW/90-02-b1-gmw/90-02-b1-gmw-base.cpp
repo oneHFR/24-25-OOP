@@ -23,8 +23,6 @@ int H7(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 	gmw_status_line(pCGI, TOP_STATUS_LINE, temp);
 	cct_gotoxy(pCGI->SLI.lower_start_x, pCGI->SLI.lower_start_y +1);
 	cout << "[Q 退出][右键 退出]/[R 重开]";
-	//void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int t);
-	
 	int next = Game(pCGI, s);
 	if (next == 1)
 		H7(pCGI, s);

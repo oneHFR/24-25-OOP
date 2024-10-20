@@ -4,7 +4,7 @@
 #define MAX_ROW 11
 #define MAX_COL 11
 
-	 /* 定义1-5的数字用何种形式显示在界面上（正常状态） */
+/* 定义1-5的数字用何种形式显示在界面上（正常状态） */
 const BLOCK_DISPLAY_INFO bdi_normal[] = {
 	{0, -1, -1, "  "},  //0不显示，用空格填充即可
 	{1, COLOR_HBLUE, COLOR_BLACK, "★"},
@@ -14,8 +14,7 @@ const BLOCK_DISPLAY_INFO bdi_normal[] = {
 	{5, COLOR_HPINK, COLOR_BLACK, "★"},
 	{-999, -1, -1, NULL} //判断结束条件为-999
 };
-
-	/* 定义1-5的数字用何种形式显示在界面上（当前选择项状态+选中后关联项状态） */
+/* 定义1-5的数字用何种形式显示在界面上（当前选择项状态+选中后关联项状态） */
 const BLOCK_DISPLAY_INFO bdi_related[] = {
 	{BDI_VALUE_BLANK, -1, -1, "  "},  //空白
 	{1, COLOR_HBLUE, COLOR_WHITE, "★"},
@@ -25,7 +24,6 @@ const BLOCK_DISPLAY_INFO bdi_related[] = {
 	{5, COLOR_HPINK, COLOR_WHITE, "★"},
 	{BDI_VALUE_END, -1, -1, NULL} //判断结束条件为-999
 };
-
 /* 定义1-5的数字用何种形式显示在界面上（选中状态） */
 const BLOCK_DISPLAY_INFO bdi_selected[] = {
 	{BDI_VALUE_BLANK, -1, -1, "  "},  //空白
@@ -37,8 +35,7 @@ const BLOCK_DISPLAY_INFO bdi_selected[] = {
 	{BDI_VALUE_END, -1, -1, NULL} //判断结束条件为-999
 };
 
-int H7(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL]);
-
+/* 具体函数功能注释 详见 tool.cpp*/
 void input(CONSOLE_GRAPHICS_INFO* const pCGI);
 
 void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL]);
@@ -46,3 +43,5 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL]);
 void fill(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL]);
 
 int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL]);
+
+int H7(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL]);

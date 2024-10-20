@@ -35,28 +35,26 @@ int main()
 		cout << "[请选择:] ";
 
 		const char* choice = "1234567890";
-		//int option = menu(choice);
-		//option = option - '0';
+		int option = menu(choice);
+		option = option - '0';
 
-		//if (!option) {
-		//	return 0;
-		//}
-		cct_cls();
-		MagicBall_CGI.row_num = 7;
-		MagicBall_CGI.col_num = 7;
-		h9(&MagicBall_CGI, s);
-		//input(&MagicBall_CGI, 5, 7);
-
-		//switch (option) {
-		//	case 9:
-		//		h9(&MagicBall_CGI, s);
-		//		break;
-		//}
+		if (!option) {
+			return 0;
+		}
+		switch (option) {
+			case 9:
+				cct_cls();
+				input(&MagicBall_CGI, 5, 7);
+				h9(&MagicBall_CGI, s);
+				break;
+			default:
+				break;
+		}
 
 		int x, y;
 		cout << endl;
 		int l = strlen("本小题结束，请输入End继续...");
-		cct_gotoxy((MagicBall_CGI.cols - l) / 2, MagicBall_CGI.SLI.lower_start_y + 1);//光标设到指定位置
+		cct_gotoxy((MagicBall_CGI.cols - l) / 2, MagicBall_CGI.SLI.lower_start_y + 2); // 光标设到指定位置
 		cout << "本小题结束，请输入End继续...";
 		cct_getxy(x, y);
 		while (1) {

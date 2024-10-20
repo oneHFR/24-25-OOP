@@ -22,7 +22,7 @@ using namespace std;
 请输入目标分数[2048/4096/8192/16384] 2048
 请输入动画延时[0-5] 0
 */
-
+/* 输入继续prompt */
 void To_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
 {
 	if (bgi->inited == CGI_INITED) { //初始化过
@@ -49,7 +49,7 @@ void To_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
 
 	return;
 }
-
+/* 输入基本参数 */
 void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 {
 	int x0 = 3;
@@ -140,7 +140,7 @@ void input_parameter(CONSOLE_GRAPHICS_INFO* const pCGI, int *t)
 	}
 
 }
-
+/* 绘制新增的色块 */
 int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi)
 {
 	int already = 0;
@@ -170,58 +170,9 @@ int new_one(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DIS
 		return 1;
 	}
 }
-
+/* 初始化基本设置 */
 void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 {
-	/*
-		  输入参数：CONSOLE_GRAPHICS_INFO *const pCGI：整体结构指针
-			   const int row					：游戏区域色块行数（缺省10）
-			   const int col					：游戏区域色块列数（缺省10）
-			   const int bgcolor				：整个窗口背景色（缺省 COLOR_BLACK）
-			   const int fgcolor				：整个窗口背景色（缺省 COLOR_WHITE）
-	  说    明：窗口背景黑/前景白，点阵16*8，上下左右无额外行列，上下状态栏均有，
-	  无行号/列标，框架线型为双线，色块宽度2/高度1/无小边框，颜色略
-		int gmw_init(CONSOLE_GRAPHICS_INFO* const pCGI, const int row, const int col, const int bgcolor, const int fgcolor)
-	*/
-
-	/*
-	int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, const int bgcolor, const int fgcolor)
-{
-
-	pCGI->inited = CGI_INITED;
-
-	gmw_set_rowcol(pCGI, row, col);
-	gmw_set_font(pCGI);
-	gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);
-	gmw_set_delay(pCGI, DELAY_OF_DRAW_FRAME, 0);
-	gmw_set_delay(pCGI, DELAY_OF_DRAW_BLOCK, 0);
-	gmw_set_delay(pCGI, DELAY_OF_BLOCK_MOVED, BLOCK_MOVED_DELAY_MS);
-	gmw_set_ext_rowcol(pCGI);
-
-	gmw_set_frame_default_linetype(pCGI, 1);
-	gmw_set_frame_style(pCGI);
-	gmw_set_frame_color(pCGI);
-
-	gmw_set_block_default_linetype(pCGI, 1);
-	gmw_set_block_border_switch(pCGI);
-
-
-	gmw_set_status_line_switch(pCGI, TOP_STATUS_LINE);
-	gmw_set_status_line_switch(pCGI, LOWER_STATUS_LINE);
-	gmw_set_status_line_color(pCGI, TOP_STATUS_LINE);
-	gmw_set_status_line_color(pCGI, LOWER_STATUS_LINE);
-
-	gmw_set_rowno_switch(pCGI);
-	gmw_set_colno_switch(pCGI);
-
-
-	pCGI->SLI.lower_catchy_fgcolor = COLOR_HYELLOW;
-	pCGI->SLI.top_catchy_fgcolor = COLOR_HYELLOW;
-
-	// 	FLAG
-	return 0; //此句可根据需要修改
-}
-	*/
 	if (mode == 1) {
 		gmw_init(pCGI);
 		gmw_set_font(pCGI, "新宋体", 16);
@@ -239,7 +190,7 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 		gmw_set_ext_rowcol(pCGI, 0, 0, 4, 4);
 	}
 }
-
+/* 移动和合并效果 */
  void move_and_merge_blocks(CONSOLE_GRAPHICS_INFO* const pCGI, int s[][MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int direction, int* check_change)
 {
 	int distance; // 记录方块可以移动的距离
@@ -349,7 +300,41 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int mode)
 		}
 	}
 }
+/* 检查游戏是否成为死局*/
+int check(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
+{
+	// 四周
+	int d_x[4] = { 1, -1, 0, 0 };
+	int d_y[4] = { 0, 0, 1, -1 };
+	int num = 0; // 非空数
 
+	for (int i = 0; i < pCGI->row_num; i++) {
+		for (int j = 0; j < pCGI->col_num; j++) {
+			if (s[i][j] != 0)
+				num++;
+
+			// 检查四周
+			for (int k = 0; k < 4; k++) {
+				int s_i = i + d_x[k];
+				int s_j = j + d_y[k];
+
+				// 检查边界
+				if (s_i >= 0 && s_i < pCGI->row_num && s_j >= 0 && s_j < pCGI->col_num) {
+					//没有死局
+					if (s[i][j] != 0 && s[i][j] == s[s_i][s_j])
+						return 1;
+				}
+			}
+		}
+	}
+
+	// 死局
+	if (num == pCGI->row_num * pCGI->col_num)
+		return 0;
+	else
+		return 1;
+}
+/* 游戏模式 */
 void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPLAY_INFO* const bdi, int t)
 {
 	int loop = 1;
@@ -435,39 +420,7 @@ void game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL], const BLOCK_DISPL
 	}
 }
 
-int check(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
-{
-	// 四周
-	int d_x[4] = { 1, -1, 0, 0 };
-	int d_y[4] = { 0, 0, 1, -1 };
-	int num = 0; // 非空数
 
-	for (int i = 0; i < pCGI->row_num; i++) {
-		for (int j = 0; j < pCGI->col_num; j++) {
-			if (s[i][j] != 0)
-				num++;
-
-			// 检查四周
-			for (int k = 0; k < 4; k++) {
-				int s_i = i + d_x[k];
-				int s_j = j + d_y[k];
-
-				// 检查边界
-				if (s_i >= 0 && s_i < pCGI->row_num && s_j >= 0 && s_j < pCGI->col_num) {
-					//没有死局
-					if (s[i][j] != 0 && s[i][j] == s[s_i][s_j])
-						return 1;
-				}
-			}
-		}
-	}
-
-	// 死局
-	if (num == pCGI->row_num * pCGI->col_num)
-		return 0;
-	else
-		return 1;
-}
 
 
 

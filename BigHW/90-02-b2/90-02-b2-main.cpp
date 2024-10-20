@@ -25,25 +25,7 @@ using namespace std;
 int main()
 {
 	srand((unsigned int)time(0));
-
 	CONSOLE_GRAPHICS_INFO G2048_CGI;
-
-	const BLOCK_DISPLAY_INFO bdi[] = {
-	{BDI_VALUE_BLANK, -1, -1, NULL},  // 0空格
-	{2, COLOR_HYELLOW, COLOR_BLACK, NULL},
-	{4, COLOR_HRED, COLOR_BLACK, NULL},
-	{8, COLOR_GREEN, COLOR_BLACK, NULL},
-	{16, COLOR_RED, COLOR_BLACK, NULL},
-	{32, COLOR_HGREEN, COLOR_BLACK, NULL},
-	{64, COLOR_HYELLOW, COLOR_BLACK, NULL},
-	{128, COLOR_HRED, COLOR_BLACK, NULL},
-	{256, COLOR_HWHITE, COLOR_BLACK, NULL},
-	{512, COLOR_HBLACK, COLOR_BLACK, NULL},
-	{1024, COLOR_HPINK, COLOR_BLACK, NULL},
-	{2048, COLOR_WHITE, COLOR_BLACK, NULL},
-	{4096, COLOR_YELLOW, COLOR_BLACK, NULL},
-	{BDI_VALUE_END, -1, -1, NULL} // NULL
-	};
 
 	while (1) {
 		int s[MAX_ROW][MAX_COL] = { 0 };
@@ -68,9 +50,6 @@ int main()
 		game(&G2048_CGI, s, bdi, t);
 
 		To_be_continued("游戏重开", &G2048_CGI);
-
 	}
-
-
 	return 0;
 }

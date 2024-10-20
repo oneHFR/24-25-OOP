@@ -12,6 +12,7 @@
 
 using namespace std;
 
+/* 输入行列数 */
 void input(CONSOLE_GRAPHICS_INFO* const pCGI)
 {
 	int min = 8;
@@ -42,12 +43,12 @@ void input(CONSOLE_GRAPHICS_INFO* const pCGI)
 	}
 	cout << endl;
 }
-
+/* 初始化基本设置 */
 void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 {
-	//input(pCGI);
-	pCGI->row_num = 8;
-	pCGI->col_num = 8;
+	input(pCGI);
+	//pCGI->row_num = 8;
+	//pCGI->col_num = 8;
 	gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE);
 	gmw_set_font(pCGI, "新宋体", 16, 8);
 	gmw_set_frame_style(pCGI, 6, 3, true);	//色块带边框，宽度为6，高度为3
@@ -61,7 +62,7 @@ void init(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 
 	fill(pCGI, s);
 }
-
+/* 绘制初始的色块 */
 void fill(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 {
 	srand((unsigned)time(NULL));
@@ -71,22 +72,8 @@ void fill(CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL])
 			gmw_draw_block(pCGI, i, j, s[i][j], bdi_normal);
 		}
 	}
-	for (int i = 0; i <= 7; i++) {
-		s[i][0] = 1;
-		s[i][1] = 1;
-		s[i][5] = 1;
-		s[i][4] = 1;
-		gmw_draw_block(pCGI, i, 0, s[i][0], bdi_normal);
-		gmw_draw_block(pCGI, i, 1, s[i][1], bdi_normal);
-		gmw_draw_block(pCGI, i, 5, s[i][5], bdi_normal);
-		gmw_draw_block(pCGI, i, 4, s[i][4], bdi_normal);
-	}
-	s[0][2] = 1;
-	s[0][3] = 1;
-	gmw_draw_block(pCGI, 0, 3, s[0][3], bdi_normal);
-	gmw_draw_block(pCGI, 0, 2, s[0][2], bdi_normal);
 }
-
+/* 检查周围是否有消除项 */
 void search(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic, int target, int option) {
 	int i = 0, j = 0;
 	//向上
@@ -141,7 +128,7 @@ void search(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic, 
 		}
 	}
 }
-
+/* 检查此处色块是否为可消除*/
 int check_valid(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic)
 {
 	int target = s[ir][ic];
@@ -156,16 +143,16 @@ int check_valid(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int 
 	}
 	return 0;
 }
-
+/* 初始化伴随矩阵 */
 void ini_h(int (*h)[MAX_COL])
 {
-	for (int i = 0; i < MAX_COL; i++) {
+	for (int i = 0; i < MAX_ROW; i++) {
 		for (int j = 0; j < MAX_COL; j++) {
 			h[i][j] = 0;
 		}
 	}
 }
-
+/* 检查游戏是否结束 */
 int check_finish(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL])
 {
 	int check_keep = 1;
@@ -181,63 +168,7 @@ int check_finish(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL])
 	}
 	return 0;
 }
-
-void search(int (*s)[MAX_COL], int r, int c, int (*h)[MAX_COL], int ir, int ic, int target, int(*pool)[MAX_COL], int option) {
-	int i = 0, j = 0;
-	//向上
-	if (option != 1) {
-		for (i = ir - 1; i >= 0; i--) {
-			if (pool[i][ic] != target) {
-				break;
-			}
-			else if (h[i][ic] != 1) {
-				h[i][ic] = 1;
-				search(s, r, c, h, i, ic, target, pool, 2);
-			}
-		}
-	}
-
-	//向下
-	if (option != 2) {
-		for (i = ir + 1; i <= r; i++) {
-			if (pool[i][ic] != target) {
-				break;
-			}
-			else if (h[i][ic] != 1) {
-				h[i][ic] = 1;
-				search(s, r, c, h, i, ic, target, pool, 1);
-			}
-		}
-	}
-
-	//向左
-	if (option != 3) {
-		for (j = ic - 1; j >= 0; j--) {
-			if (pool[ir][j] != target) {
-				break;
-			}
-			else if (h[ir][j] != 1) {
-				h[ir][j] = 1;
-				search(s, r, c, h, ir, j, target, pool, 4);
-			}
-		}
-	}
-
-	//向右
-	if (option != 4) {
-		for (j = ic + 1; j <= c; j++) {
-			if (pool[ir][j] != target) {
-				break;
-			}
-			else if (h[ir][j] != 1) {
-				h[ir][j] = 1;
-				search(s, r, c, h, ir, j, target, pool, 3);
-			}
-		}
-	}
-
-}
-
+/* 下落效果 */
 void fall(const CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL], int r, int c)
 {
 	for (int j = 0; j < c; ++j) {
@@ -255,7 +186,7 @@ void fall(const CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL], int r, int
 		}
 	}
 }
-
+/* 侧向移动效果 */
 void ceyi(const CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL], int r, int c)
 {
 	int stride = 0;
@@ -278,6 +209,7 @@ void ceyi(const CONSOLE_GRAPHICS_INFO* const pCGI, int (*s)[MAX_COL], int r, int
 			}
 	}
 }
+/* 计分函数 */
 void Score(int r, int c, int (*h)[MAX_COL], int* num, int* total, int* rest, int mode = 0)
 {
 	for (int i = 0; i < r; i++) {
@@ -294,7 +226,7 @@ void Score(int r, int c, int (*h)[MAX_COL], int* num, int* total, int* rest, int
 	else
 		*total += *num;
 }
-
+/* 实际数组的合并消除的数字置为0 为后面移动效果提供定位信息*/
 void remove_0(int (*s)[MAX_COL], int r, int c, int(*h)[MAX_COL])
 {
 	for (int j = 0; j < c; j++) {
@@ -305,9 +237,7 @@ void remove_0(int (*s)[MAX_COL], int r, int c, int(*h)[MAX_COL])
 		}
 	}
 }
-
-
-
+/* 游戏模式 */
 int Game(CONSOLE_GRAPHICS_INFO* const pCGI, int(*s)[MAX_COL])
 {
 	int grid = 1;

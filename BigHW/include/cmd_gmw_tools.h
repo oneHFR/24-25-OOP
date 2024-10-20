@@ -180,7 +180,7 @@ typedef struct _console_font_type_ {
 /* 定义初始化标记 */
 #define CGI_INITED			99999
 
-/* 定义描述整个窗口全部信息的结构体 【4】*/
+/* 【4】定义描述整个窗口全部信息的结构体*/
 typedef struct _console_graphics_info_ {
 	/* 【下面定义的是可通过设置函数改变的值，不准修改成员名】 */
 

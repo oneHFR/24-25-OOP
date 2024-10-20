@@ -1435,22 +1435,22 @@ int main(int argc, char** argv)
 	cct_setcursor(CURSOR_INVISIBLE);
 
 	/* 用固定值测试框架 */
-	//test_by_fixed();
+	test_by_fixed();
 
 	/* 用键盘输入值测试框架 */
 	//test_by_input();
 
 	/* 用 color_linez 来测试游戏区域 */
-	//test_color_linez();
+	test_color_linez();
 
 	/* 用 magic_ball 来测试游戏区域 */
 	test_magic_ball();
 
 	/* 用 2048 来测试游戏区域 */
-	//test_2048();
+	test_2048();
 
 	/* 用 合成十 来测试游戏区域 */
-	//test_merge_to_10();
+	test_merge_to_10();
 
 	/* 用 消灭星星 来测试游戏区域 */
 	test_popstar();
