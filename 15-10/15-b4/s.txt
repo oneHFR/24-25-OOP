@@ -1,0 +1,3 @@
+Usage : d1 --infile 原始文件 [ --outfile hex格式文件 ]
+        d1 --infile a.docx
+        d1 --infile a.docx --outfile a.hex

@@ -1,0 +1,4 @@
+Usage : d3 --check 文件名 | --convert { wtol|ltow } 源文件名 目标文件名
+        d3 --check a.txt
+        d3 --convert wtol a.win.txt a.linux.txt
+        d3 --convert ltow a.linux.txt a.win.txt
