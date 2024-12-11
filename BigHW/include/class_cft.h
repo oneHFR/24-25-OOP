@@ -49,8 +49,9 @@ private:
 	
 	// flag
 	struct ConfigItem {
-		string name;      // 项目名
-		string value;     // 值
+		string name;	// 项目名
+		string value;	// 值
+		string raw;		// 为了那个tab的测试...
 	};
 
 	struct ConfigGroup {
@@ -66,20 +67,10 @@ private:
 
 
 	/* 允许添加其它需要的数据成员和成员函数（private部分仅允许自用而不对外） */
-	void parse_line(const string& line);                // 解析单行内容
-	string remove_carriage_return(const string& line);  // 处理\r字符
-	bool is_group_line(const string& line);            // 判断是否为组声明行
-	bool is_item_line(const string& line);             // 判断是否为配置项行
-	void read_config_file();
+	string truncate_after_marker(const string& input_string);
 	string trim(const string& str);
-	void add_group(const string& line);                // 添加新组
-	void add_item(const string& line);                 // 添加新配置项
-	string get_group_name(const string& line);         // 从行中提取组名
-	string get_item_name(const string& line);
-	string get_item_value(const string& line);
-	pair<string, string> parse_item(const string& line); // 解析配置项的名称和值
+	int read_config_file();
 	string to_upper(const string& str) const;
-	void to_lower(string& str);
 
 
 public:

@@ -54,18 +54,18 @@ long get_cur_msec(void)
 ***************************************************************************/
 void wait_for_enter()
 {
-	cout << endl << "按回车键继续，Ctrl+C中断执行";
+	//cout << endl << "按回车键继续，Ctrl+C中断执行";
 
-	char ch;
-	while (1) {
-		ch = _getch();
-		if (ch == '\3')
-			exit(-1);	//Ctrl+C强行中断
-		if (ch == '\r')
-			break; //结束循环
-	}
+	//char ch;
+	//while (1) {
+	//	ch = _getch();
+	//	if (ch == '\3')
+	//		exit(-1);	//Ctrl+C强行中断
+	//	if (ch == '\r')
+	//		break; //结束循环
+	//}
 
-	cout << endl << endl;
+	//cout << endl << endl;
 }
 
 /***************************************************************************
