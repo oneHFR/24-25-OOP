@@ -27,6 +27,9 @@
     <ClCompile Include="..\common\class_aat.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="hw_check_db.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hw_check.h">
@@ -38,5 +41,21 @@
     <ClInclude Include="..\include\class_aat.h">
       <Filter>头文件</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\lib_mariadb_x86\libmariadb.dll">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\lib_mariadb_x86\libmariadb.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="..\lib_mariadb_x86\mariadbclient.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="..\lib_mariadb_x86\mysqlservices.lib">
+      <Filter>资源文件</Filter>
+    </Library>
   </ItemGroup>
 </Project>

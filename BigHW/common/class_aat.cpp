@@ -566,94 +566,291 @@ const string args_analyse_tools::get_str_ipaddr() const
   返 回 值：
   说    明：友元函数
 ***************************************************************************/
-int args_analyse_process(const int argc, const char* const* const argv, args_analyse_tools* const args, const int follow_up_args) 
+//int args_analyse_process(const int argc, const char* const* const argv, args_analyse_tools* const args, const int follow_up_args) 
+//{
+//	int args_count = 0;
+//	while (args[args_count].get_name() != "") args_count++;
+//
+//	for (int i = 1; i < argc; i++) {
+//		bool matched = false;
+//
+//		for (int arg_idx = 0; arg_idx < args_count; arg_idx++) {
+//			if (args[arg_idx].args_name == argv[i]) {
+//				matched = true;
+//
+//				if (args[arg_idx].args_existed) {
+//					cout << "参数[" << args[arg_idx].args_name << "]重复.\n";
+//					return -1;
+//				}
+//
+//				args[arg_idx].args_existed = 1;
+//				if (args[arg_idx].extargs_num) {
+//					if (++i >= argc || (argv[i][0] == '-' && argv[i][1] == '-')) {
+//						cout << "参数[" << args[arg_idx].args_name << "]的附加参数不足.\n";
+//						return -1;
+//					}
+//
+//					bool is_valid = true;
+//					int parsed_int = 0;
+//					unsigned int parsed_ip = 0;
+//					string parsed_string = argv[i];
+//
+//					switch (args[arg_idx].extargs_type) {
+//						case ST_EXTARGS_TYPE::int_with_default:
+//							parsed_int = a2int(argv[i], is_valid);
+//							if (!is_valid || parsed_int < args[arg_idx].extargs_int_min || parsed_int > args[arg_idx].extargs_int_max)
+//								parsed_int = args[arg_idx].extargs_int_default;
+//							args[arg_idx].extargs_int_value = parsed_int;
+//							break;
+//
+//						case ST_EXTARGS_TYPE::int_with_error:
+//							parsed_int = a2int(argv[i], is_valid);
+//							if (!is_valid || parsed_int < args[arg_idx].extargs_int_min || parsed_int > args[arg_idx].extargs_int_max) {
+//								cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
+//								return -1;
+//							}
+//							args[arg_idx].extargs_int_value = parsed_int;
+//							break;
+//
+//						case ST_EXTARGS_TYPE::int_with_set_default:
+//						case ST_EXTARGS_TYPE::int_with_set_error:
+//							parsed_int = a2int(argv[i], is_valid);
+//							if (!is_valid || !is_value_in_set(parsed_int, args[arg_idx].extargs_int_set)) {
+//								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::int_with_set_error) {
+//									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
+//									return -1;
+//								}
+//								parsed_int = args[arg_idx].extargs_int_default;
+//							}
+//							args[arg_idx].extargs_int_value = parsed_int;
+//							break;
+//
+//						case ST_EXTARGS_TYPE::ipaddr_with_default:
+//						case ST_EXTARGS_TYPE::ipaddr_with_error:
+//							parsed_ip = ip2int(argv[i], is_valid);
+//							if (!is_valid) {
+//								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::ipaddr_with_error) {
+//									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
+//									return -1;
+//								}
+//								parsed_ip = args[arg_idx].extargs_ipaddr_default;
+//							}
+//							args[arg_idx].extargs_ipaddr_value = parsed_ip;
+//							break;
+//
+//						case ST_EXTARGS_TYPE::str:
+//							args[arg_idx].extargs_string_value = parsed_string;
+//							break;
+//
+//						case ST_EXTARGS_TYPE::str_with_set_default:
+//						case ST_EXTARGS_TYPE::str_with_set_error:
+//							if (!is_value_in_set(parsed_string, args[arg_idx].extargs_string_set)) {
+//								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::str_with_set_error) {
+//									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
+//									return -1;
+//								}
+//								parsed_string = args[arg_idx].extargs_string_default;
+//							}
+//							args[arg_idx].extargs_string_value = parsed_string;
+//							break;
+//
+//						default:
+//							break;
+//					}
+//				}
+//				break;
+//			}
+//		}
+//
+//		if (!matched) {
+//			if (argv[i][0] == '-' && argv[i][1] == '-') {
+//				cout << "参数[" << argv[i] << "]非法.\n";
+//				return -1;
+//			}
+//			else if (follow_up_args) {
+//				return i;
+//			}
+//			else {
+//				cout << "参数[" << argv[i] << "]格式非法.\n";
+//				return -1;
+//			}
+//		}
+//	}
+//	return argc;
+//}
+
+int args_analyse_process(const int argc, const char* const* const argv, args_analyse_tools* const args, const int follow_up_args)
 {
-	int args_count = 0;
-	while (args[args_count].get_name() != "") args_count++;
-
-	for (int i = 1; i < argc; i++) {
-		bool matched = false;
-
-		for (int arg_idx = 0; arg_idx < args_count; arg_idx++) {
-			if (args[arg_idx].args_name == argv[i]) {
-				matched = true;
-
-				if (args[arg_idx].args_existed) {
-					cout << "参数[" << args[arg_idx].args_name << "]重复.\n";
+	int length = 0;
+	while (args[length].get_name() != "")
+		length++;
+	int i;
+	for (i = 1; i < argc; i++) {
+		int j;
+		for (j = 0; j < length; j++) {
+			if (args[j].args_name == argv[i]) {
+				if (args[j].args_existed) {
+					cout << "参数[" << args[j].args_name << "]重复.\n";
 					return -1;
 				}
-
-				args[arg_idx].args_existed = 1;
-				if (args[arg_idx].extargs_num) {
-					if (++i >= argc || (argv[i][0] == '-' && argv[i][1] == '-')) {
-						cout << "参数[" << args[arg_idx].args_name << "]的附加参数不足.\n";
-						return -1;
-					}
-
-					bool is_valid = true;
-					int parsed_int = 0;
-					unsigned int parsed_ip = 0;
-					string parsed_string = argv[i];
-
-					switch (args[arg_idx].extargs_type) {
+				args[j].args_existed = 1;
+				if (args[j].extargs_num) {
+					i++;
+					int num;
+					bool check = 1;
+					int value = 0;
+					unsigned int ipv = 0;
+					string stringv = "";
+					switch (args[j].extargs_type) {
 						case ST_EXTARGS_TYPE::int_with_default:
-							parsed_int = a2int(argv[i], is_valid);
-							if (!is_valid || parsed_int < args[arg_idx].extargs_int_min || parsed_int > args[arg_idx].extargs_int_max)
-								parsed_int = args[arg_idx].extargs_int_default;
-							args[arg_idx].extargs_int_value = parsed_int;
-							break;
-
-						case ST_EXTARGS_TYPE::int_with_error:
-							parsed_int = a2int(argv[i], is_valid);
-							if (!is_valid || parsed_int < args[arg_idx].extargs_int_min || parsed_int > args[arg_idx].extargs_int_max) {
-								cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:int, 范围[" << args[j].extargs_int_min << ".." << args[j].extargs_int_max
+									<< "] 缺省:" << args[j].extargs_int_default << ")" << endl;
 								return -1;
 							}
-							args[arg_idx].extargs_int_value = parsed_int;
+							value = a2int(argv[i], check);
+							if (!check || value<args[j].extargs_int_min || value > args[j].extargs_int_max)
+								value = args[j].extargs_int_default;
+							args[j].extargs_int_value = value;
 							break;
-
+						case ST_EXTARGS_TYPE::int_with_error:
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:int, 范围[" << args[j].extargs_int_min << ".." << args[j].extargs_int_max
+									<< "])" << endl;
+								return -1;
+							}
+							value = a2int(argv[i], check);
+							if (!check || value<args[j].extargs_int_min || value > args[j].extargs_int_max)
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数值(" << argv[i] << ")非法. (类型:int, 范围[" << args[j].extargs_int_min << ".." << args[j].extargs_int_max << "])\n";
+								return -1;
+							}
+							args[j].extargs_int_value = value;
+							break;
 						case ST_EXTARGS_TYPE::int_with_set_default:
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:int, 可取值[";
+								show(args[j].extargs_int_set);
+								cout << "] 缺省:" << args[j].extargs_int_default << ")" << endl;
+								return -1;
+							}
+							value = a2int(argv[i], check);
+							if (!check) {
+								args[j].extargs_int_value = args[j].extargs_int_default;
+							}
+							else {
+
+								for (num = 0; args[j].extargs_int_set[num] != INVALID_INT_VALUE_OF_SET; num++)
+									if (value == args[j].extargs_int_set[num])
+										break;
+								if (args[j].extargs_int_set[num] == INVALID_INT_VALUE_OF_SET)
+									args[j].extargs_int_value = args[j].extargs_int_default;
+								else
+									args[j].extargs_int_value = value;
+								break;
+							}
 						case ST_EXTARGS_TYPE::int_with_set_error:
-							parsed_int = a2int(argv[i], is_valid);
-							if (!is_valid || !is_value_in_set(parsed_int, args[arg_idx].extargs_int_set)) {
-								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::int_with_set_error) {
-									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
-									return -1;
-								}
-								parsed_int = args[arg_idx].extargs_int_default;
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:int, 可取值[";
+								show(args[j].extargs_int_set);
+								cout << "])" << endl;
+								return -1;
 							}
-							args[arg_idx].extargs_int_value = parsed_int;
+							value = a2int(argv[i], check);
+							for (num = 0; args[j].extargs_int_set[num] != INVALID_INT_VALUE_OF_SET; num++)
+								if (value == args[j].extargs_int_set[num])
+									break;
+							if (args[j].extargs_int_set[num] == INVALID_INT_VALUE_OF_SET)
+								check = 0;
+							if (!check)
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数值(" << argv[i] << ")非法. (类型:int, 可取值[";
+								show(args[j].extargs_int_set);
+								cout << "])\n";
+								return -1;
+							}
+							args[j].extargs_int_value = value;
 							break;
-
 						case ST_EXTARGS_TYPE::ipaddr_with_default:
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:IP地址";
+								cout << " 缺省:" << int2ip(args[j].extargs_ipaddr_default) << ")" << endl;
+								return -1;
+							}
+							ipv = ip2int(argv[i], check);
+							if (check == 0)
+								ipv = args[j].extargs_ipaddr_default;
+							args[j].extargs_ipaddr_value = ipv;
+							break;
 						case ST_EXTARGS_TYPE::ipaddr_with_error:
-							parsed_ip = ip2int(argv[i], is_valid);
-							if (!is_valid) {
-								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::ipaddr_with_error) {
-									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
-									return -1;
-								}
-								parsed_ip = args[arg_idx].extargs_ipaddr_default;
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:IP地址)" << endl;
+								return -1;
 							}
-							args[arg_idx].extargs_ipaddr_value = parsed_ip;
+							ipv = ip2int(argv[i], check);
+							if (check == 0)
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数值(" << argv[i] << ")非法. (类型:IP地址)\n";
+								return -1;
+							}
+							args[j].extargs_ipaddr_value = ipv;
 							break;
-
 						case ST_EXTARGS_TYPE::str:
-							args[arg_idx].extargs_string_value = parsed_string;
-							break;
-
-						case ST_EXTARGS_TYPE::str_with_set_default:
-						case ST_EXTARGS_TYPE::str_with_set_error:
-							if (!is_value_in_set(parsed_string, args[arg_idx].extargs_string_set)) {
-								if (args[arg_idx].extargs_type == ST_EXTARGS_TYPE::str_with_set_error) {
-									cout << "参数[" << args[arg_idx].args_name << "]的附加参数值(" << argv[i] << ")非法.\n";
-									return -1;
-								}
-								parsed_string = args[arg_idx].extargs_string_default;
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:string";
+								if (args[j].extargs_string_default == "")
+									cout << ")" << endl;
+								else
+									cout << " 缺省:" << args[j].extargs_string_default << ")" << endl;
+								return -1;
 							}
-							args[arg_idx].extargs_string_value = parsed_string;
+							stringv = argv[i];
+							args[j].extargs_string_value = stringv;
 							break;
-
+						case ST_EXTARGS_TYPE::str_with_set_default:
+							if (i >= argc || argv[i][0] == '-' && argv[i][1] == '-')
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数不足. " << "(类型:string, 可取值[";
+								show(args[j].extargs_string_set);
+								cout << "] 缺省:" << args[j].extargs_string_default << ")" << endl;
+								return -1;
+							}
+							stringv = argv[i];
+							for (num = 0; args[j].extargs_string_set[num] != ""; num++)
+								if (stringv == args[j].extargs_string_set[num])
+									break;
+							if (args[j].extargs_string_set[num] == "")
+								stringv = args[j].extargs_string_default;
+							args[j].extargs_string_value = stringv;
+							break;
+						case ST_EXTARGS_TYPE::str_with_set_error:
+							if (!check)
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数值(" << argv[i] << ")非法. (类型:int, 可取值[";
+								show(args[j].extargs_string_set);
+								cout << "])" << endl;
+								return -1;
+							}
+							stringv = argv[i];
+							for (num = 0; args[j].extargs_string_set[num] != ""; num++)
+								if (stringv == args[j].extargs_string_set[num])
+									break;
+							if (args[j].extargs_string_set[num] == "")
+							{
+								cout << "参数[" << args[j].args_name << "]的附加参数值(" << stringv << ")非法. (类型:string, 可取值[";
+								show(args[j].extargs_string_set);
+								cout << "])" << endl;
+								return -1;
+							}
+							args[j].extargs_string_value = stringv;
+							break;
 						default:
 							break;
 					}
@@ -661,24 +858,25 @@ int args_analyse_process(const int argc, const char* const* const argv, args_ana
 				break;
 			}
 		}
-
-		if (!matched) {
-			if (argv[i][0] == '-' && argv[i][1] == '-') {
-				cout << "参数[" << argv[i] << "]非法.\n";
+		if (j == length) {
+			if (argv[i][0] == '-' && argv[i][1] == '-')
+			{
+				cout << "参数[" << argv[i] << "]非法." << endl;
 				return -1;
 			}
-			else if (follow_up_args) {
+			else if (follow_up_args)
+			{
 				return i;
 			}
-			else {
-				cout << "参数[" << argv[i] << "]格式非法.\n";
+			else
+			{
+				cout << "参数[" << argv[i] << "]格式非法" << endl;
 				return -1;
 			}
 		}
 	}
-	return argc;
+	return i;
 }
-
 
 /***************************************************************************
   函数名称：

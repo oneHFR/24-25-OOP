@@ -1184,7 +1184,7 @@ int main()
 	if (1) {
 		cout << "/*************************     erase Test      *****************************/" << endl;
 
-		TStringAdv s1 = "apple pie", s2 = "pie apple pie", s3 = "pie", s4 = "Aaapie";
+		TStringAdv s1 = "applepie", s2 = "pieapplepie", s3 = "pie", s4 = "Aaapie";
 		char str1[] = "apple";
 		const char* str2 = "pie";
 		char c = 'p', c1 = 'a';
@@ -1195,15 +1195,15 @@ int main()
 
 		// 测试 erase(const char *s)
 		s1.erase(str1);
-		cout << "s1应该为 ，                          实际：" << s1 << endl;
+		cout << "s1应该为<EMPTY> ，                          实际：" << s1 << endl;
 
 		// 测试 erase(const char &c)
 		s1.erase(c);
-		cout << "s1应该为 ，                          实际：" << s1 << endl;
+		cout << "s1应该为<EMPTY> ，                          实际：" << s1 << endl;
 
 		// 测试 erase(const TStringAdv &ts2)（第二次出现）
 		s2.erase(s3);
-		cout << "s2应该为apple pie ，                实际：" << s2 << endl;
+		cout << "s2应该为applepie ，                实际：" << s2 << endl;
 
 		// 测试 erase(const char *s)（删除“apple”）
 		s2.erase(str1);
@@ -1224,7 +1224,7 @@ int main()
 
 	if (1) {
 		cout << "/*************************     str Test        *****************************/" << endl;
-		TStringAdv s1("Tongji University");
+		TStringAdv s1("TongjiUniversity");
 
 		// substr(pos, len)
 		TStringAdv sub = s1.substr(1, 5);
@@ -1236,7 +1236,7 @@ int main()
 
 		// 无len返回原串
 		sub = s1.substr(1);
-		cout << "sub应为Tongji University，实际输出：" << sub << endl;
+		cout << "sub应为TongjiUniversity，实际输出：" << sub << endl;
 
 		// pos非法返回空串
 		sub = s1.substr(999, 3);

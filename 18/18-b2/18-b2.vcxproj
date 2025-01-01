@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{591813f0-3fb5-4c84-a986-3313dd40cfde}</ProjectGuid>
-    <RootNamespace>hwcheck</RootNamespace>
+    <ProjectGuid>{bca44297-b61b-4950-bfd4-e6e82fabc49a}</ProjectGuid>
+    <RootNamespace>My18b2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,24 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\class_aat.cpp" />
-    <ClCompile Include="..\common\class_cft.cpp" />
-    <ClCompile Include="hw_check_db.cpp" />
-    <ClCompile Include="hw_check_main.cpp" />
-    <ClCompile Include="hw_check_tool.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\class_aat.h" />
-    <ClInclude Include="..\include\class_cft.h" />
-    <ClInclude Include="hw_check.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\lib_mariadb_x86\libmariadb.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\lib_mariadb_x86\libmariadb.lib" />
-    <Library Include="..\lib_mariadb_x86\mariadbclient.lib" />
-    <Library Include="..\lib_mariadb_x86\mysqlservices.lib" />
+    <ClCompile Include="18-b2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

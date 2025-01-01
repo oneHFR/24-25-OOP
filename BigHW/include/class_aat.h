@@ -101,7 +101,7 @@ private:
 	void init();
 
 public:
-	args_analyse_tools();
+	args_analyse_tools() ;
 	args_analyse_tools(const char* arg_name, const enum ST_EXTARGS_TYPE type, const int ext_num, const bool def);
 	args_analyse_tools(const char* arg_name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def, const int _min, const int _max);
 	args_analyse_tools(const char* arg_name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const int* const set);

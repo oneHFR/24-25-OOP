@@ -1,4 +1,4 @@
-///*1953628 孙万录 计科*/
+//1953628 计科 孙万录
 //#include <iostream>
 //using namespace std;
 //
