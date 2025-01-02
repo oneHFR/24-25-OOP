@@ -12,8 +12,6 @@
 static void usage(const char* const full_procname);
 int checkArgs(const int argc, const char* const argv[], args_analyse_tools args[]);
 
-
-
 enum OPT_ARGS {
     OPT_ARGS_HELP = 0,
     OPT_ARGS_DEBUG,
@@ -28,21 +26,17 @@ enum OPT_ARGS {
 };
 
 struct First_Check_Info {
-    //const int token_num = 3;
-    //3不要写死，但没法在结构体内引用常量
     string msg_info;
-    bool token_ok[3];	// no class name
+    bool token_ok[3];
     string first_line;
 };
 
-//second line stu info
 struct Second_Check_Stu {
     string stu_no;
     string stu_name;
     string msg;
 };
 
-//second line check info
 struct Second_Check {
     bool isValid = true;
     bool second_safe = false;
@@ -71,10 +65,10 @@ struct HW_List {
 
 class HW_Check {
 protected:
-    // 命令行参数 
     struct Args {
         int action = 0;     // 0:base 1:firstline 2:secondline  
         long long cno = 10108001;        // 课号
+        long long cno2 = 0;        // 课号
         int stu = -1;        // -1表示all
         string file = "all";    // all或具体文件名
         int chapter = -1;    // -1表示all
@@ -83,13 +77,12 @@ protected:
         string cfgfile = "hw_check.conf"; // 配置文件
     } Args;
 
-    // 配置信息
     struct Config {
-        string src_rootdir;  // 源文件根目录
-        string dbserver;     // 数据库服务器
-        string dbuser;       // 数据库用户名
-        string dbpasswd;     // 数据库密码
-        string dbname;       // 数据库名
+        string src_rootdir;
+        string dbserver;
+        string dbuser;
+        string dbpasswd;
+        string dbname;
     } config;
 
     const vector<string> extention{
@@ -101,17 +94,16 @@ protected:
 
 public:
     int get_data(vector<STU_List>& stu_list, vector<HW_List>& hw_list, vector<Second_Check>& second_list);
-    int readArgs(args_analyse_tools args[]);  // 参数已实现
-    int readConf(); // 配置已实现
+    int readArgs(args_analyse_tools args[]);
+    int readConf();
     int exe();
 
     // 三种检查的具体实现
     int baseCheck(ifstream& infile, string& filename, int& imsg);
     int firstlineCheck(ifstream& infile, const STU_List& stu, int& imsg, First_Check_Info& info);
-    int secondlineCheck(ifstream& infile, Second_Check& second_check, int& imsg, First_Check_Info& info);
+    int secondlineCheck(ifstream& infile, string& filename, Second_Check& second_check, int& imsg, First_Check_Info& info);
 
     int checkInfoCheck1(const string& str, const STU_List& stu, First_Check_Info& info);
-    //int checkFirstLineFormat(const string& line, vector<string>& tokens);
     int checkInfoCheck2(vector<Second_Check>& list);
 
     void processHomework(vector<Second_Check>& list, const STU_List& stu, const HW_List& hw, int msg_cnt_glb[], int msg_cnt_stu[], const char* msg_set[], First_Check_Info& info);

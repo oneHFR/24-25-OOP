@@ -30,43 +30,48 @@ using std::min;
 */
 
 const int
-MSG_CORRECT = 0,                    // 正确
-MSG_NOT_SUBMIT = 1,                 // 未提交
-MSG_PDF_ERROR = 2,                  // PDF文件格式错误
-MSG_VS_FORMAT_ERROR = 3,           // 源文件格式不正确(VS无法识别)
-MSG_ENCODE_ERROR = 4,               // 源文件格式不正确(非GB编码)
-MSG_MULTI_COMMENT_FORMAT_ERROR = 5, // 首行多行注释格式不正确
-MSG_FIRST_LINE_NOT_COMMENT = 6,     // 首行不是注释行
-MSG_FIRST_LINE_NOT_THREE = 7,       // 首行不是三项
-MSG_FIRST_LINE_ERROR = 8,           // 首行检查出错
+    MSG_CORRECT = 0,                    // 正确
+    MSG_NOT_SUBMIT = 1,                 // 未提交
+    MSG_PDF_ERROR = 2,                  // PDF文件格式错误
+    MSG_VS_FORMAT_ERROR = 3,           // 源文件格式不正确(VS无法识别)
+    MSG_ENCODE_ERROR = 4,               // 源文件格式不正确(非GB编码)
+    MSG_MULTI_COMMENT_FORMAT_ERROR = 5, // 首行多行注释格式不正确
+    MSG_FIRST_LINE_NOT_COMMENT = 6,     // 首行不是注释行
+    MSG_FIRST_LINE_NOT_THREE = 7,       // 首行不是三项
+    MSG_FIRST_LINE_ERROR = 8,           // 首行检查出错
 
-MSG_SECOND_LINE_ERROR = 9,          // 次行不是注释
-MSG_FILE_SIZE_ZERO = 10,             // 文件大小为0
-MSG_FILE_TOO_SMALL = 11,             // 文件小于4字节
-MSG_NO_VALID_FIRST_LINE = 12;       // 无有效首行
+    MSG_SECOND_LINE_ERROR = 9,          // 次行不是注释
+    S1 = 10,
+    S2 = 11, 
+    S3 = 12;
 
 const char* msg_set[] = {
     "正确",  //0
     "未提交",  //1
-    "PDF文件格式不正确", //3
-    "源文件格式不正确(VS无法识别)", //10
-    "源文件格式不正确(非GB编码)", //2
-    "首行多行注释格式不正确", //12 首行不是符合要求的/* */格式
-    "首行不是注释行",  //4
-    "首行不是三项", //5
+    "PDF文件格式不正确", //2
+    "源文件格式不正确(VS无法识别)", //3
+    "源文件格式不正确(非GB编码)", //4
+    "首行多行注释格式不正确", //5 首行不是符合要求的/* */格式
+    "首行不是注释行",  //6
+    "首行不是三项", //7
     "首行检查出错",  //6 首行学号不匹配班级不匹配 [///*1953628 孙万录 计科*/]
                                     //    首行学号不匹配姓名不匹配 [///*孙万录 计科 1953628*/]
 
-    "次行不是注释", //7
-    "文件大小为0", //8
-    "文件小于4字节", //9
-    "无有效首行", //11
+    "次行不是注释", //9
+    "待查1", //10
+    "待查1", //11
+    "待查1", //12
 };
 
 void HW_Check::printSingleFileInfo(const vector<STU_List>& stu_list, const string& filename) {
 //课号: 10108001 学生数量 : 87 源文件名 : 15 - b5.c
-    cout << "课号 : " << this->Args.cno
-        << " 学生数量 : " << (Args.stu == -1 ? stu_list.size() : 1)
+    if (this->Args.cno2) {
+        cout << "课号 : " << this->Args.cno << "," << this->Args.cno2;
+    }
+    else {
+        cout << "课号 : " << this->Args.cno;
+    }
+        cout << " 学生数量 : " << (Args.stu == -1 ? stu_list.size() : 1)
         << " 源文件名 : " << filename << endl;
 }
 
@@ -142,7 +147,7 @@ void printGlobalStatistics2(size_t stu_count, size_t hw_count, const int msg_cnt
         */
     int mar = 12;
     int mar2 = 2;
-    // 计算最长提示文本的长度
+
     size_t max_width = 0;
     for (int i = 0; i < prompt_len; i++) {
         if (msg_cnt[i] > 0) {
@@ -154,10 +159,14 @@ void printGlobalStatistics2(size_t stu_count, size_t hw_count, const int msg_cnt
     }
 
     cout << resetiosflags(ios::left) << setiosflags(ios::right);
-    cout << "\n检查通过" << msg_cnt[0]  << "/"<< stu_count << "个学生，本次通过"
+    if (msg_cnt[0] == stu_count)
+        cout << "\n全部通过";
+    else
+        cout << "\n检查通过";
+    cout << msg_cnt[0]  << "/"<< stu_count << "个学生，本次通过"
         << msg_cnt[0] << "个" << endl;
 
-    cout << string(max_width + mar, '=') << endl;  // 动态设置分隔线长度
+    cout << string(max_width + mar, '=') << endl;
     cout << "详细信息\n";
     cout << string(max_width + mar, '=') << endl;
 
@@ -173,7 +182,6 @@ void printGlobalStatistics(size_t stu_count, size_t hw_count, const int msg_cnt[
 {
     int mar = 12;
     int mar2 = 2;
-    // 计算最长提示文本的长度
     size_t max_width = 0;
     for (int i = 0; i < prompt_len; i++) {
         if (msg_cnt[i] > 0) {
@@ -189,7 +197,7 @@ void printGlobalStatistics(size_t stu_count, size_t hw_count, const int msg_cnt[
         << stu_count * hw_count << "，通过总数:" << msg_cnt[0]
         << "，本次通过" << msg_cnt[0] << "个" << endl;
 
-    cout << string(max_width + mar, '=') << endl;  // 动态设置分隔线长度
+    cout << string(max_width + mar, '=') << endl;
     cout << "整体详细信息\n";
     cout << string(max_width + mar, '=') << endl;
 
@@ -200,7 +208,6 @@ void printGlobalStatistics(size_t stu_count, size_t hw_count, const int msg_cnt[
     }
     cout << string(max_width + mar, '=') << "\n\n";
 }
-
 
 bool isBlank(const string& line) {
     return all_of(line.begin(), line.end(), isspace);
@@ -253,6 +260,23 @@ bool isComment(const string& str) {
     size_t firstNonSpace = str.find_first_not_of(" \t");
     bool isCorrect = (firstNonSpace != string::npos && (str.substr(firstNonSpace, 2) == "//" || str.substr(firstNonSpace, 2) == "/*"));
     return isCorrect;
+}
+
+bool isMacFormat(ifstream& file) {
+    file.clear();
+    file.seekg(0, ios::beg);
+
+    char c;
+    int cr_count = 0, lf_count = 0;
+
+    // 统计文件中CR和LF的数量
+    while (file.get(c)) {
+        if (c == '\r') cr_count++;
+        if (c == '\n') lf_count++;
+    }
+
+    // Mac格式: 只有CR(\r)没有LF(\n)
+    return (cr_count > 0 && lf_count == 0);
 }
 
 int removeCommentFlag(string& str) {
@@ -421,20 +445,30 @@ int HW_Check::readArgs(args_analyse_tools args[])
     }
 
     string cno_str = args[OPT_ARGS_CNO].get_string();
-    if (this->Args.action != 2) {
-        if (cno_str.length() != 8 && cno_str.length() != 13) {
+    int helper = 1;
+    if (cno_str.length() != 8 && cno_str.length() != 13) {
+        helper = -1;
+        if (this->Args.action == 2) {
+            if (cno_str.length() == 17) {
+                helper = 2;
+                stringstream ss(cno_str);
+                string number1, number2;
+                if (getline(ss, number1, ',') && getline(ss, number2)) {
+                    this->Args.cno = stoll(number1);
+                    this->Args.cno2 = stoll(number2);
+                }
+                //cout << this->Args.cno << endl;;
+                //cout << this->Args.cno2 <<endl;
+            }
+        }
+        if (helper == -1) {
             cout << "课号不是8/13位" << endl;
-            return -1;
+            return helper;
         }
     }
-    else
-    {
-        if (cno_str.length() != 8 && cno_str.length() != 13) {
-            cout << "课号不是8/13位" << endl;
-            return -1;
-        }
+    if (helper != 2) {
+        this->Args.cno = stoll(cno_str);
     }
-    this->Args.cno = stoll(cno_str);
 
     string stu_tmp = args[OPT_ARGS_STU].get_string();
     if ("all" == stu_tmp) {
@@ -601,42 +635,36 @@ int HW_Check::checkInfoCheck2(vector<Second_Check>& list)
             continue;
         }
 
-        // 检查学生信息完整性
-        bool info_incomplete = false;
-        for (size_t j = 0; j < student.check_list.size(); ++j) {
-            const auto& partner = student.check_list[j];
-            if (partner.stu_no.empty() || partner.stu_name.empty()) {
-                student.isValid = false;
-                cout << "第[" << (j + 1) << "]个学生后面的信息不全(只读到一项)，后续内容忽略" << endl;
-                info_incomplete = true;
-                break;
-            }
-        }
-        if (info_incomplete) {
-            continue;
-        }
-
         // 检查互查关系
-        for (auto& partner : student.check_list) {
+        for (size_t i = 0; i < student.check_list.size(); ++i) {
+            if (int(i) > student.cutline)
+                break;
+            auto& partner = student.check_list[i];
             bool partner_found = false;
 
             // 查找并验证对方学生信息
             for (const auto& other : list) {
+
                 if (other.stu_no == partner.stu_no) {
                     partner_found = true;
 
                     // 检查姓名一致性
                     if (partner.stu_name != other.stu_name) {
-                        partner.msg += "对方姓名不正确  ";
+                        partner.msg = "对方姓名不正确  ";
                     }
 
                     // 检查对方是否也选择了我
                     bool mutually_selected = false;
-                    for (const auto& other_partner : other.check_list) {
-                        if (other_partner.stu_no == student.stu_no) {
+                    for (size_t j = 0; j < other.check_list.size(); ++j) {
+                        if (int(j) > other.cutline)
+                            break;
+                        if (other.check_list[j].stu_no == student.stu_no) {
                             mutually_selected = true;
-                            if (other_partner.stu_name != student.stu_name) {
-                                partner.msg += "没写对你名字  ";
+                            if (other.check_list[j].stu_name != student.stu_name) {
+                                partner.msg = "没写对你名字  ";
+                                if (!other.isValid) {
+                                    partner.msg = "抛弃了你  ";
+                                }
                             }
                             break;
                         }
@@ -655,15 +683,28 @@ int HW_Check::checkInfoCheck2(vector<Second_Check>& list)
         }
     }
 
-    // 打印结果
-    for (size_t i = 0; i < list.size(); i++) {
 
+
+
+    // 打印
+    for (size_t i = 0; i < list.size(); i++) {
+        if (i + 1 == 120)
+            int a = 1;
         auto& student = list[i];
         //bool has_duplicate = false;
+        int more_Safe = 0;
+
         for (size_t i = 0; i < student.check_list.size(); ++i) {
             for (size_t j = i + 1; j < student.check_list.size(); ++j) {
                 if (student.check_list[i].stu_name == student.check_list[j].stu_no || student.check_list[i].stu_no == student.check_list[j].stu_no) {
-                    student.has_duplicate = true;
+                    if (student.check_list.size() > 2) {
+                        more_Safe++;
+                        if (more_Safe >= 2) {
+                            student.has_duplicate = true;
+                        }
+                    }
+                    else
+                        student.has_duplicate = true;
                     break;
                 }
             }
@@ -676,7 +717,7 @@ int HW_Check::checkInfoCheck2(vector<Second_Check>& list)
             while ((pos = name.find("·")) != string::npos)
                 name.replace(pos, strlen("·"), ".");
         }
-        cout << setw(3) << i + 1 << ": " << this->Args.cno << '-' << student.stu_no << '-' << name << endl;
+        cout << setw(3) << i + 1 << ": " << student.stu_cno << '-' << student.stu_no << '-' << name << endl;
         if (student.isValid && student.second_safe && student.has_duplicate) {
             size_t half_size = (1 + student.check_list.size()) / 2; // 获取列表的一半大小
             int half_size_final = std::min(int(half_size), student.cutline);
@@ -684,7 +725,11 @@ int HW_Check::checkInfoCheck2(vector<Second_Check>& list)
                 half_size = 0;
             }
             for (size_t j = half_size; j < half_size + half_size_final; ++j) {
+                if (j >= student.check_list.size())
+                    break;
                 const auto& partner = student.check_list[j];
+                if (i + 1 == 120)
+                    int a = 1;
                 if (partner.stu_no != student.stu_no && partner.stu_name != student.stu_no) {
                     string temp_stu_no = partner.stu_no;
                     removeCommentFlag(temp_stu_no);
@@ -712,24 +757,8 @@ int HW_Check::checkInfoCheck2(vector<Second_Check>& list)
     return 0;
 }
 
-bool isMacFormat(ifstream& file) {
-    file.clear();
-    file.seekg(0, ios::beg);
-
-    char c;
-    int cr_count = 0, lf_count = 0;
-
-    // 统计文件中CR和LF的数量
-    while (file.get(c)) {
-        if (c == '\r') cr_count++;
-        if (c == '\n') lf_count++;
-    }
-
-    // Mac格式: 只有CR(\r)没有LF(\n)
-    return (cr_count > 0 && lf_count == 0);
-}
-
-int HW_Check::baseCheck(ifstream& infile, string& filename, int& imsg) {
+int HW_Check::baseCheck(ifstream& infile, string& filename, int& imsg)
+{
 
     infile.clear();
     infile.seekg(0, ios::beg);
@@ -747,6 +776,7 @@ int HW_Check::baseCheck(ifstream& infile, string& filename, int& imsg) {
     if (find(extention.begin(), extention.end(), extension) != extention.end())
     {
         if (isUft8File(infile)) {
+            //second_check.isValid = false;
             imsg = MSG_ENCODE_ERROR;
             return -1;
         }
@@ -797,14 +827,25 @@ int HW_Check::firstlineCheck(ifstream& infile, const STU_List& stu, int& imsg, F
     return 0;
 }
 
-int HW_Check::secondlineCheck(ifstream& infile, Second_Check& second_check, int& imsg, First_Check_Info& info) {
+int HW_Check::secondlineCheck(ifstream& infile, string& filename, Second_Check& second_check, int& imsg, First_Check_Info& info) {
     const int STU_NO_LENGTH = 7;
     infile.clear();
     infile.seekg(0, ios::beg);
     string secondLine;
     skipLines(infile, 2, secondLine);
 
+    string extension = filename.substr(filename.find_last_of(".") + 1);
+    if (find(extention.begin(), extention.end(), extension) != extention.end())
+    {
+        if (isUft8File(infile)) {
+            second_check.isValid = false;
+            imsg = MSG_ENCODE_ERROR;
+            return -1;
+        }
+    }
+
     if (!isComment(secondLine)) {
+        second_check.isValid = false;
         imsg = MSG_SECOND_LINE_ERROR;
         return -1;
     }
@@ -818,44 +859,93 @@ int HW_Check::secondlineCheck(ifstream& infile, Second_Check& second_check, int&
     string studentNo, studentName;
     int count = 0;
 
+    //while (stream >> (count % 2 ? studentName : studentNo)) {
+    //    count++;
+    //    if (count % 2 == 1) {
+    //        // 检查学号长度
+    //        if (studentNo.length() != STU_NO_LENGTH) {
+    //            //imsg = MSG_SECOND_LINE_ERROR;
+    //            //second_check.isValid = false;
+    //            info.msg_info = "第" + to_string((count + 1) / 2) + "位同学的学号[" + studentNo + "]不是" + to_string(STU_NO_LENGTH) + "位，后续内容忽略";
+
+    //            second_check.cutline = ((count + 1) / 2) - 1;
+    //            second_check.second_safe = true;
+    //            return -1;
+    //        }
+    //        // 检查是否写了自己
+    //        if (studentNo == second_check.stu_no) {
+    //            //imsg = MSG_SECOND_LINE_ERROR;
+    //            //second_check.isValid = false;
+    //            info.msg_info = "第[" + to_string((count + 1) / 2) + "]项写了自己，后续内容忽略";
+    //            second_check.second_safe = true;
+    //            return -1;
+    //        }
+    //    }
+    //    else {
+    //        second_check.check_list.push_back({ studentNo, studentName, "" });
+    //    }
+    //info.msg_info = "第[" + to_string((count + 1) / 2) + "]个学生信息不完整，后续内容忽略";
 
     while (stream >> (count % 2 ? studentName : studentNo)) {
+
         count++;
+
+        // 检查是否只读到一项（奇数项）
+        if (count % 2 == 1 && stream.eof()) {
+            info.msg_info = "第[" + to_string((count + 1) / 2 -1) + "]个学生后面的信息不全(只读到一项)，后续内容忽略";
+            second_check.cutline = ((count + 1) / 2) - 1;
+            second_check.second_safe = true;
+            return -1;
+        }
+
         if (count % 2 == 1) {
-            // 检查学号长度
-            if (studentNo.length() != STU_NO_LENGTH) {
-                //imsg = MSG_SECOND_LINE_ERROR;
-                //second_check.isValid = false;
-                info.msg_info = "第" + to_string((count + 1) / 2) + "位同学的学号[" + studentNo + "]不是"+to_string(STU_NO_LENGTH)+"位，后续内容忽略";
-                
+            // 先检查学号中是否包含非法字符（非数字字符）
+            if (!all_of(studentNo.begin(), studentNo.end(), [](unsigned char c) {
+                return isdigit(c);
+                })) {
+                //info.msg_info = "第" + to_string((count + 1) / 2) + "位同学的学号[" + studentNo + "]含有非数字字符，后续内容忽略";
+                info.msg_info = "第" + to_string((count + 1) / 2) + "位同学的学号[" + studentNo + "]不是" + to_string(STU_NO_LENGTH) + "位，后续内容忽略";
+
                 second_check.cutline = ((count + 1) / 2) - 1;
                 second_check.second_safe = true;
                 return -1;
             }
-
+            // 再检查学号长度
+            if (studentNo.length() != STU_NO_LENGTH) {
+                info.msg_info = "第" + to_string((count + 1) / 2) + "位同学的学号[" + studentNo + "]不是" + to_string(STU_NO_LENGTH) + "位，后续内容忽略";
+                second_check.cutline = ((count + 1) / 2) - 1;
+                second_check.second_safe = true;
+                return -1;
+            }
             // 检查是否写了自己
             if (studentNo == second_check.stu_no) {
-                //imsg = MSG_SECOND_LINE_ERROR;
-                //second_check.isValid = false;
                 info.msg_info = "第[" + to_string((count + 1) / 2) + "]项写了自己，后续内容忽略";
                 second_check.second_safe = true;
                 return -1;
             }
         }
+        
         else {
+            // 检查学生姓名是否为空
+            if (studentName.empty()) {
+                info.msg_info = "第[" + to_string(count / 2 - 1) + "]个学生姓名为空，后续内容忽略";
+                second_check.cutline = (count / 2) - 1;
+                second_check.second_safe = true;
+                return -1;
+            }
             second_check.check_list.push_back({ studentNo, studentName, "" });
         }
     }
 
-    if (count % 2) {
-        //second_check.isValid = false;
-        //imsg = MSG_SECOND_LINE_ERROR;
-        info.msg_info = "第[" + to_string((count + 1) / 2 - 1) + "]个学生信息不完整，后续内容忽略";
+    // 检查最后一次读取是否完整（是否读到了偶数项）
+    if (count % 2 == 1) {
+        info.msg_info = "第[" + to_string((count + 1) / 2) + "]个学生后面的信息不全(只读到一项)，后续内容忽略";
         second_check.cutline = ((count + 1) / 2) - 1;
-
         second_check.second_safe = true;
         return -1;
     }
+
+
 
     second_check.second_safe = true;
     return 0;
@@ -863,9 +953,38 @@ int HW_Check::secondlineCheck(ifstream& infile, Second_Check& second_check, int&
 
 void HW_Check::processHomework(vector<Second_Check>& second_check_list, const STU_List& stu, const HW_List& hw, int msg_cnt_glb[], int msg_cnt_stu[], const char* msg_set[], First_Check_Info& info)
 {
+    if (hw.hw_cno != stu.stu_cno)
+        return ;
     static int index4s = 1;
 
-    // 打开文件
+    //auto it = find_if(second_check_list.begin(), second_check_list.end(),
+    //    [&stu](const Second_Check& check) {
+    //        return check.stu_no == stu.stu_no;
+    //    });
+
+    // 创建新的 Second_Check 对象
+    Second_Check new_check;
+    new_check.stu_no = stu.stu_no;
+    new_check.stu_name = stu.stu_name;
+    new_check.stu_cno = stu.stu_cno;
+
+    bool found = false;
+    size_t check_index = 0;
+
+    for (size_t i = 0; i < second_check_list.size(); i++) {
+        if (second_check_list[i].stu_no == stu.stu_no) {
+            found = true;
+            check_index = i;
+            break;
+        }
+    }
+
+    if (!found) {
+        second_check_list.push_back(new_check);
+        check_index = second_check_list.size() - 1;
+    }
+
+
     string cur_filename = this->config.src_rootdir + hw.hw_cno + "-" + stu.stu_no + "\\" + hw.hw_filename;
     ifstream infile(cur_filename, ios::in | ios::binary);
 
@@ -873,7 +992,7 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
     string msg = msg_set[imsg];
 
     if (!infile.is_open()) {
-        imsg = 1;  // 未提交
+        imsg = 1;
         msg = msg_set[imsg];
         msg_cnt_glb[imsg]++;
         msg_cnt_stu[imsg]++;
@@ -881,6 +1000,9 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
     else {
         // 基础检查
         if (baseCheck(infile, cur_filename, imsg) < 0) {
+            //second_check.isValid = false;
+            //it->isValid = false;  // 设置 isValid 为 false
+            second_check_list[check_index].isValid = false;  // 使用索引直接访问
             msg = msg_set[imsg];
             msg_cnt_glb[imsg]++;
             msg_cnt_stu[imsg]++;
@@ -903,7 +1025,7 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
         else if (this->Args.action == 2) {  // 第二行检查
             for (auto& it : second_check_list) {
                 if (it.stu_no == stu.stu_no) {
-                    if (secondlineCheck(infile, it, imsg, info) < 0) {
+                    if (secondlineCheck(infile, cur_filename, it, imsg, info) < 0) {
                         msg = info.msg_info;
                         if (msg == "")
                             msg = string(msg_set[imsg]);
@@ -924,7 +1046,7 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
     }
 
     // 根据display配置打印信息
-    if (this->Args.action != 2) {
+    if (this->Args.action != 2 && this->Args.file == "all") {
         if (!((imsg == 0 && this->Args.display[0] == '0') ||
             (imsg == 1 && this->Args.display[1] == '0') ||
             (imsg >= 2 && this->Args.display[2] == '0'))) {
@@ -933,8 +1055,15 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
             //if ()
             if (this->Args.cno == 5000244001602)
                 width++;
-            if (this->Args.week != -1 || this->Args.chapter != -1)
-                width = 10;
+            if (this->Args.week != -1 || this->Args.chapter != -1) {
+                if (this->Args.cno == 5000244001602) {
+                    width = 11;
+                }
+                else {
+                    width = 10;
+                }
+            }
+
             cout << "  " << setw(width) << hw.hw_filename << ": " << msg << endl;
         }
     }
@@ -945,13 +1074,11 @@ void HW_Check::processHomework(vector<Second_Check>& second_check_list, const ST
         // 处理姓名中的点号
         while ((pos = name.find("·")) != string::npos) {
             name.replace(pos, strlen("·"), ".");
+        }
         if (this->Args.cno != 5000244001602) {
             mar = 16;
             int width = 1;
-            }
         }
-
-
         // 计算学号/姓名组合的总长度并设置固定宽度
         string student_info = stu.stu_no + "/" + name;
         cout << resetiosflags(ios::right) << setiosflags(ios::left)
@@ -983,7 +1110,7 @@ int HW_Check::exe()
     // 统计数组
     int msg_cnt_glb[prompt_len] = { 0 };
 
-    if (this->Args.action == 2) {
+    if (this->Args.action == 2 || this->Args.file != "all") {
         // 遍历作业列表找到目标文件
         for (const auto& hw : hw_list) {
             printSingleFileInfo(stu_list, hw.hw_filename);
@@ -999,7 +1126,7 @@ int HW_Check::exe()
         First_Check_Info info;
 
         // 打印学生基本信息
-        if (this->Args.action != 2)
+        if (this->Args.action != 2 && this->Args.file == "all")
             printStudentInfo(stu_i + 1, stu, hw_list.size());
 
 
@@ -1007,17 +1134,19 @@ int HW_Check::exe()
         for (const auto& hw : hw_list) {
             if (hw.hw_filename == "3-b1-1.c")
                 int a = 0; // flag
+            //if(a)
+            //cout << second_check_list.size() << endl;
             processHomework(second_check_list, stu, hw, msg_cnt_glb, msg_cnt_stu, msg_set, info);
         }
 
         // 打印学生详细统计
-        if (this->Args.action != 2 && this->Args.display[3] != '0') {
+        if (this->Args.action != 2 && this->Args.display[3] != '0' && this->Args.file == "all") {
             printStudentStatistics(msg_cnt_stu, hw_list.size(), msg_set);
         }
     }
 
     // 打印全局统计
-    if (this->Args.action != 2)
+    if (this->Args.action != 2 && this->Args.file == "all")
         printGlobalStatistics(stu_list.size(), hw_list.size(), msg_cnt_glb, msg_set);
     else
         printGlobalStatistics2(stu_list.size(), hw_list.size(), msg_cnt_glb, msg_set);

@@ -31,6 +31,11 @@ int HW_Check::get_data(vector<STU_List>& stu_list, vector<HW_List>& hw_list, vec
 
     // 查询学生信息
     string cmd1 = "select * from view_hwcheck_stulist where stu_cno = \"" + to_string(this->Args.cno) + "\"";
+    if (this->Args.cno2) {
+        cmd1 = "select * from view_hwcheck_stulist where stu_cno = " +
+            to_string(this->Args.cno) + " or stu_cno = " +
+            to_string(this->Args.cno2);
+    }
     if (this->Args.stu != -1) {
         cmd1 += " AND stu_no = \"" + to_string(this->Args.stu) + "\"";
     }
@@ -97,7 +102,13 @@ int HW_Check::get_data(vector<STU_List>& stu_list, vector<HW_List>& hw_list, vec
     mysql_free_result(result1);
 
     // 查询作业信息
-    string cmd2 = "select * from view_hwcheck_hwlist where hw_cno = \"" + to_string(this->Args.cno) + "\"";
+    string cmd2 = "select * from view_hwcheck_hwlist where hw_cno in ( \"" + to_string(this->Args.cno) + "\")";
+    if (this->Args.cno2) {
+        cmd2 = "select * from view_hwcheck_hwlist where (hw_cno = " +
+            to_string(this->Args.cno) + " or hw_cno = " +
+            to_string(this->Args.cno2) + ")";
+    }
+
     if (this->Args.chapter != -1) {
         cmd2 += " AND hw_chapter = \"" + to_string(this->Args.chapter) + "\"";
     }
@@ -107,7 +118,7 @@ int HW_Check::get_data(vector<STU_List>& stu_list, vector<HW_List>& hw_list, vec
     if (this->Args.file != "all") {
         cmd2 += " AND hw_filename = \"" + this->Args.file + "\"";
     }
-
+    //cout << cmd2.c_str();
     if (mysql_query(mysql, cmd2.c_str())) {
         cout << "mysql_query failed(" << mysql_error(mysql) << ")" << endl;
         return -1;
