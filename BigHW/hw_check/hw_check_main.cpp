@@ -5,6 +5,80 @@
 #include "../include/class_aat.h"
 #include "hw_check.h"
 
+// ×Ô²â½Å±¾
+/*
+@REM Base
+hw_check --action base --cno 10108001 --stu all --file all > m.txt
+hw_ddemo --action base --cno 10108001 --stu all --file all > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >c.txt
+
+hw_check --action base --cno 10108001 --stu all --file all --week 6 --chapter 13> m.txt
+hw_ddemo --action base --cno 10108001 --stu all --file all --week 6 --chapter 13 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action base --cno 10108002 --stu all --file all --week 6 --chapter 13 > m.txt
+hw_ddemo --action base --cno 10108002 --stu all --file all --week 6 --chapter 13 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action base --cno 5000244001602 --stu all --file all --week 6 --chapter 4 > m.txt
+hw_ddemo --action base --cno 5000244001602 --stu all --file all --week 6 --chapter 4 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action base --cno 5000244001602 --stu all --file all > m.txt
+hw_ddemo --action base --cno 5000244001602 --stu all --file all > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action base --cno 10108001 --stu all --file 15-b5.c > m.txt
+hw_ddemo --action base --cno 10108001 --stu all --file 15-b5.c > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action base --cno 10108001 --stu 2152131 --file 15-b5.c > m.txt
+hw_ddemo --action base --cno 10108001 --stu 2152131 --file 15-b5.c > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+@REM Firstline
+hw_check --action firstline --cno 10108001 --stu all --file all > m.txt
+hw_ddemo --action firstline --cno 10108001 --stu all --file all > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 10108001 --stu all --file all --week 6 --chapter 13> m.txt
+hw_ddemo --action firstline --cno 10108001 --stu all --file all --week 6 --chapter 13 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 10108002 --stu all --file all --week 6 --chapter 13 > m.txt
+hw_ddemo --action firstline --cno 10108002 --stu all --file all --week 6 --chapter 13 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 5000244001602 --stu all --file all --week 6 --chapter 4 > m.txt
+hw_ddemo --action firstline --cno 5000244001602 --stu all --file all --week 6 --chapter 4 > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 5000244001602 --stu all --file all > m.txt
+hw_ddemo --action firstline --cno 5000244001602 --stu all --file all > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 10108001 --stu all --file 15-b5.c > m.txt
+hw_ddemo --action firstline --cno 10108001 --stu all --file 15-b5.c > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action firstline --cno 10108001 --stu 2152131 --file 15-b5.c > m.txt
+hw_ddemo --action firstline --cno 10108001 --stu 2152131 --file 15-b5.c > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+@REM Secondline
+hw_ddemo --action secondline --cno 10108001,10108002 --stu all --file 15-b5.c > d.txt
+hw_check --action secondline --cno 10108001,10108002 --stu all --file 15-b5.c > m.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action secondline --cno 10108002 --stu all --file 15-b2.cpp > m.txt
+hw_ddemo --action secondline --cno 10108002 --stu all --file 15-b2.cpp > d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+hw_check --action secondline --cno 5000244001602 --stu all --file 5-b14.c --cfgfile hw_check.conf> m.txt
+hw_ddemo --action secondline --cno 5000244001602 --stu all --file 5-b14.c --cfgfile hw_check.conf> d.txt
+txt_compare --file1 d.txt --file2 m.txt --trim right --display normal >>c.txt
+
+*/
 
 int main(int argc, char** argv)
 {
